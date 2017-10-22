@@ -1,0 +1,23 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+group = 'com.tmc'
+version = '0.0.1-SNAPSHOT'
+
+ext {
+    applicationName = 'transactions-monitor-tmc'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.projectlombok:lombok:1.16.16'
+    compile 'org.apache.logging.log4j:log4j-tmc:2.8.2'
+    compile 'org.apache.logging.log4j:log4j-api:2.8.2'
+}
