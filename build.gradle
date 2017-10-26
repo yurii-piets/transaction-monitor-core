@@ -1,23 +1,28 @@
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'maven'
 
-group = 'com.tmc'
+group = 'com.transaction-monitor'
 version = '0.0.1-SNAPSHOT'
 
 ext {
-    applicationName = 'transactions-monitor-tmc'
+    applicationName = 'transaction-monitor-core'
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    mavenLocal()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
     compile 'org.projectlombok:lombok:1.16.16'
-    compile 'org.apache.logging.log4j:log4j-tmc:2.8.2'
-    compile 'org.apache.logging.log4j:log4j-api:2.8.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
+
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.4.RELEASE'
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    testCompile 'junit:junit:4.12'
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
 }
