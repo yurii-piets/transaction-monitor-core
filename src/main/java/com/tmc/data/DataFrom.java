@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 @Service
@@ -18,7 +19,7 @@ public class DataFrom {
         this.dataSource = dataSource;
     }
 
-    private void dbConnect() throws SQLException {
-        dataSource.getConnection();
+    private Connection dbConnect() throws SQLException {
+        return dataSource.getConnection();
     }
 }
