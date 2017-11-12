@@ -15,7 +15,6 @@ import org.springframework.core.io.ClassPathResource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,9 +34,8 @@ public class TMConfig {
 
     public void init(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(TMConfig.class, args);
-        dataSource = context.getBean(DataSource.class);
+        DataSource dataSource = context.getBean(DataSource.class);
         initConfigPropertyFiles();
-
     }
 
     /**
@@ -64,11 +62,5 @@ public class TMConfig {
                     return file;
                 })
                 .collect(Collectors.toSet());
-    }
-
-    private DataSource dataSource;
-
-    public void testDataSource() throws SQLException {
-        dataSource.getConnection();
     }
 }
