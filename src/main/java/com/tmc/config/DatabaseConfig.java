@@ -1,24 +1,20 @@
 package com.tmc.config;
 
 import com.tmc.services.DatabasePropertyService;
-import lombok.Setter;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.core.env.Environment;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-@Configuration
-public class DatabaseConfig implements BeanFactoryAware {
+@Component
+public class DatabaseConfig {
 
-    @Setter
-    private BeanFactory beanFactory;
+    @Autowired
+    private ConfigurableBeanFactory configurableBeanFactory;
 
     @Autowired
     private DatabasePropertyService databasePropertyService;
@@ -28,8 +24,6 @@ public class DatabaseConfig implements BeanFactoryAware {
 
     @PostConstruct
     public void configure() {
-        Assert.state(beanFactory instanceof ConfigurableBeanFactory, "wrong bean factory type");
-        ConfigurableBeanFactory configurableBeanFactory = (ConfigurableBeanFactory) beanFactory;
         for (String qualifier : databasePropertyService.getQualifiers()) {
             DataSource dataSource = dataSource(qualifier);
             configurableBeanFactory.registerSingleton(qualifier, dataSource);
@@ -43,10 +37,21 @@ public class DatabaseConfig implements BeanFactoryAware {
 
     private DataSource dataSource(String qualifier) {
         BasicDataSource ds = new BasicDataSource();
-        ds.setUrl(env.getProperty(URL_PATTERN.replace("{qualifier}", qualifier)));
-        ds.setUsername(env.getProperty(USERNAME_PATTERN.replace("{qualifier}", qualifier)));
-        ds.setPassword(env.getProperty(PASSWORD_PATTERN.replace("{qualifier}", qualifier)));
-        ds.setDriverClassName(env.getProperty(DRIVER_CLASSNAME_PATTERN.replace("{qualifier}", qualifier)));
+
+        String replaceUrl = URL_PATTERN.replace("{qualifier}", qualifier);
+        String replaceUsername = USERNAME_PATTERN.replace("{qualifier}", qualifier);
+        String replaceDriverClass = DRIVER_CLASSNAME_PATTERN.replace("{qualifier}", qualifier);
+        String replacePassword = PASSWORD_PATTERN.replace("{qualifier}", qualifier);
+
+        String url = env.getRequiredProperty(replaceUrl);
+        String username = env.getRequiredProperty(replaceUsername);
+        String password = env.getRequiredProperty(replacePassword);
+        String driverClassName = env.getRequiredProperty(replaceDriverClass);
+
+        ds.setUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
+        ds.setDriverClassName(driverClassName);
         return ds;
     }
 }
