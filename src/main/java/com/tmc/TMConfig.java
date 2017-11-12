@@ -1,6 +1,5 @@
 package com.tmc;
 
-import com.tmc.services.DatabasePropertyService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -14,12 +13,7 @@ public class TMConfig {
 
     private ConfigurableApplicationContext applicationContext;
 
-    public void init(String[] args) {
+    public void boot(String[] args) {
         applicationContext = SpringApplication.run(TMConfig.class, args);
-    }
-
-    public void testPropertySources(){
-        DatabasePropertyService propertyService = applicationContext.getBean(DatabasePropertyService.class);
-        propertyService.getNames();
     }
 }
