@@ -43,7 +43,7 @@ public class DatabasePropertyService {
         return configurationResources;
     }
 
-    private Set<String> getQualifiers() {
+    public Set<String> getQualifiers() {
         Reflections reflections = new Reflections();
         Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
 
