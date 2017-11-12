@@ -13,6 +13,12 @@ import javax.sql.DataSource;
 @Component
 public class DatabaseConfig {
 
+    private final static String URL_PATTERN = "{qualifier}.url";
+    private final static String USERNAME_PATTERN = "{qualifier}.username";
+    private final static String PASSWORD_PATTERN = "{qualifier}.password";
+    private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
+    private static final String QUALIFIER_PATTERN = "{qualifier}";
+
     private final ConfigurableBeanFactory configurableBeanFactory;
 
     private final DatabasePropertyService databasePropertyService;
@@ -34,18 +40,13 @@ public class DatabaseConfig {
         }
     }
 
-    private final static String URL_PATTERN = "{qualifier}.url";
-    private final static String USERNAME_PATTERN = "{qualifier}.username";
-    private final static String PASSWORD_PATTERN = "{qualifier}.password";
-    private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
-
     private DataSource dataSource(String qualifier) {
         BasicDataSource ds = new BasicDataSource();
 
-        String replaceUrl = URL_PATTERN.replace("{qualifier}", qualifier);
-        String replaceUsername = USERNAME_PATTERN.replace("{qualifier}", qualifier);
-        String replaceDriverClass = DRIVER_CLASSNAME_PATTERN.replace("{qualifier}", qualifier);
-        String replacePassword = PASSWORD_PATTERN.replace("{qualifier}", qualifier);
+        String replaceUrl = URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
+        String replaceUsername = USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
+        String replaceDriverClass = DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
+        String replacePassword = PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
 
         String url = env.getRequiredProperty(replaceUrl);
         String username = env.getRequiredProperty(replaceUsername);
