@@ -19,7 +19,7 @@ public class DataFrom {
         this.dataSource = dataSource;
     }
 
-    private Connection dbConnect() throws SQLException {
+    public Connection dbConnect() throws SQLException {
         return dataSource.getConnection();
     }
 }
