@@ -11,8 +11,12 @@ import java.sql.SQLException;
 @Component
 public class DataFrom {
 
+    private final ConfigurableApplicationContext applicationContext;
+
     @Autowired
-    private ConfigurableApplicationContext applicationContext;
+    public DataFrom(ConfigurableApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     public Connection getConnectionByQualifier(String qualifier) throws SQLException {
         DataSource dataSource = applicationContext.getBean(qualifier, DataSource.class);

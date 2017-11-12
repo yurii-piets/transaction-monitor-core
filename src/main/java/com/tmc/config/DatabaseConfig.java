@@ -13,14 +13,18 @@ import javax.sql.DataSource;
 @Component
 public class DatabaseConfig {
 
-    @Autowired
-    private ConfigurableBeanFactory configurableBeanFactory;
+    private final ConfigurableBeanFactory configurableBeanFactory;
+
+    private final DatabasePropertyService databasePropertyService;
+
+    private final Environment env;
 
     @Autowired
-    private DatabasePropertyService databasePropertyService;
-
-    @Autowired
-    private Environment env;
+    public DatabaseConfig(ConfigurableBeanFactory configurableBeanFactory, DatabasePropertyService databasePropertyService, Environment env) {
+        this.configurableBeanFactory = configurableBeanFactory;
+        this.databasePropertyService = databasePropertyService;
+        this.env = env;
+    }
 
     @PostConstruct
     public void configure() {
