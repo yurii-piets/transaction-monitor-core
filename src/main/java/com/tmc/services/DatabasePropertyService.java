@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class DatabasePropertyService {
 
     @Bean
-    public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(){
+    public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
         Resource[] resources = getResources().toArray(new Resource[]{});
         propertySourcesPlaceholderConfigurer.setLocations(resources);
@@ -40,5 +41,18 @@ public class DatabasePropertyService {
                 .collect(Collectors.toSet());
 
         return configurationResources;
+    }
+
+    private Set<String> getQualifiers() {
+        Reflections reflections = new Reflections();
+        Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
+
+        Set<String> qualifiers = configs.stream()
+                .map(c -> c.getAnnotation(DatabaseProperty.class))
+                .map(DatabaseProperty::qualifiers)
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toSet());
+
+        return qualifiers;
     }
 }
