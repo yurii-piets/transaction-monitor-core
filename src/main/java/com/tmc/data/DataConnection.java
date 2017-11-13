@@ -9,12 +9,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Component
-public class DataFrom {
+public class DataConnection {
 
     private final ConfigurableApplicationContext applicationContext;
 
     @Autowired
-    public DataFrom(ConfigurableApplicationContext applicationContext) {
+    public DataConnection(ConfigurableApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 

@@ -23,13 +23,15 @@ public class DatabaseConfig {
 
     private final DatabasePropertyService databasePropertyService;
 
-    private final Environment env;
+    private final Environment environment;
 
     @Autowired
-    public DatabaseConfig(ConfigurableBeanFactory configurableBeanFactory, DatabasePropertyService databasePropertyService, Environment env) {
+    public DatabaseConfig(ConfigurableBeanFactory configurableBeanFactory,
+                          DatabasePropertyService databasePropertyService,
+                          Environment environment) {
         this.configurableBeanFactory = configurableBeanFactory;
         this.databasePropertyService = databasePropertyService;
-        this.env = env;
+        this.environment = environment;
     }
 
     @PostConstruct
@@ -43,20 +45,11 @@ public class DatabaseConfig {
     private DataSource dataSource(String qualifier) {
         BasicDataSource ds = new BasicDataSource();
 
-        String replaceUrl = URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
-        String replaceUsername = USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
-        String replaceDriverClass = DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
-        String replacePassword = PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier);
+        ds.setUrl(environment.getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setUsername(environment.getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setPassword(environment.getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setDriverClassName(environment.getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
 
-        String url = env.getRequiredProperty(replaceUrl);
-        String username = env.getRequiredProperty(replaceUsername);
-        String password = env.getRequiredProperty(replacePassword);
-        String driverClassName = env.getRequiredProperty(replaceDriverClass);
-
-        ds.setUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
-        ds.setDriverClassName(driverClassName);
         return ds;
     }
 }

@@ -17,11 +17,11 @@ public class DatabasePropertyService {
 
     @Bean
     public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+        PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
         Resource[] resources = getResources().toArray(new Resource[]{});
-        propertySourcesPlaceholderConfigurer.setLocations(resources);
-        propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
-        return propertySourcesPlaceholderConfigurer;
+        pspc.setLocations(resources);
+        pspc.setIgnoreUnresolvablePlaceholders(true);
+        return pspc;
     }
 
     /**
