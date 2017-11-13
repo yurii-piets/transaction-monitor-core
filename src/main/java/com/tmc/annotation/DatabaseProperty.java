@@ -17,4 +17,6 @@ public @interface DatabaseProperty {
      * Put as value path to database configuration file
      */
     String value() default "";
+
+    String[] qualifiers() default {};
 }
