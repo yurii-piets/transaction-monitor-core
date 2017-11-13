@@ -4,7 +4,8 @@ import com.tmc.services.DatabasePropertyService;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.core.env.Environment;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -23,15 +24,15 @@ public class DatabaseConfig {
 
     private final DatabasePropertyService databasePropertyService;
 
-    private final Environment environment;
+    private final PropertySourcesPlaceholderConfigurer pspc;
 
     @Autowired
     public DatabaseConfig(ConfigurableBeanFactory configurableBeanFactory,
                           DatabasePropertyService databasePropertyService,
-                          Environment environment) {
+                          PropertySourcesPlaceholderConfigurer pspc) {
         this.configurableBeanFactory = configurableBeanFactory;
         this.databasePropertyService = databasePropertyService;
-        this.environment = environment;
+        this.pspc = pspc;
     }
 
     @PostConstruct
@@ -45,11 +46,31 @@ public class DatabaseConfig {
     private DataSource dataSource(String qualifier) {
         BasicDataSource ds = new BasicDataSource();
 
-        ds.setUrl(environment.getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setUsername(environment.getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setPassword(environment.getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setDriverClassName(environment.getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setUrl(getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setUsername(getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setPassword(getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        ds.setDriverClassName(getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
 
         return ds;
+    }
+
+    private String getRequiredProperty(String key){
+        if(!pspc.getAppliedPropertySources().contains("localProperties")) {
+            throw new IllegalStateException("localProperties" + " are not defined");
+        }
+
+        PropertySource<?> localProperties = pspc.getAppliedPropertySources().get("localProperties");
+
+        if(!localProperties.containsProperty(key)){
+            throw new IllegalStateException("Property [\"" + key + "\"] is not defined");
+        }
+
+        Object propertyValue = localProperties.getProperty(key);
+
+        if(propertyValue == null){
+            throw new IllegalStateException("Property [\"" + key + "\"] has null value");
+        }
+
+        return propertyValue.toString();
     }
 }
