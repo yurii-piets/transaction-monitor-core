@@ -11,6 +11,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class TMConfig {
 
+    public static ConfigurableApplicationContext boot() {
+        return SpringApplication.run(TMConfig.class);
+    }
+
     public static ConfigurableApplicationContext boot(String[] args) {
         return SpringApplication.run(TMConfig.class, args);
     }
