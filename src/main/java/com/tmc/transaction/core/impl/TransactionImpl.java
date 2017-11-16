@@ -70,7 +70,7 @@ public class TransactionImpl implements Transaction {
             commitForAll();
         } catch (SQLException e) {
             logger.error(e.getMessage());
-            rollback();
+            executor.revertCommands();
             logger.info("Applied revert on databases.");
         }
     }
