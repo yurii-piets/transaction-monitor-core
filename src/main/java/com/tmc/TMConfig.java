@@ -12,12 +12,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class TMConfig {
 
-    public static TransactionFactory boot() {
-        ConfigurableApplicationContext applicationContext = SpringApplication.run(TMConfig.class);
-        return new TransactionFactory(applicationContext);
-    }
-
-    public static TransactionFactory boot(String[] args) {
+    public static TransactionFactory boot(String... args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(TMConfig.class, args);
         return new TransactionFactory(applicationContext);
     }

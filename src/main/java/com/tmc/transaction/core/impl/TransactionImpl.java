@@ -34,7 +34,8 @@ public class TransactionImpl implements Transaction {
     private final DatabasePropertyService databasePropertyService;
 
     @Autowired
-    public TransactionImpl(DataConnectionManager dataConnectionManager, DatabasePropertyService databasePropertyService) {
+    public TransactionImpl(DataConnectionManager dataConnectionManager,
+                           DatabasePropertyService databasePropertyService) {
         this.dataConnectionManager = dataConnectionManager;
         this.databasePropertyService = databasePropertyService;
     }
@@ -78,14 +79,13 @@ public class TransactionImpl implements Transaction {
         connection.setAutoCommit(false);
     }
 
-    private void commitForAll() {
+    private void commitForAll() throws SQLException {
         for (String qualifier: activeQualifiers){
             Connection connection = dataConnectionManager.getConnectionByQualifier(qualifier);
             try {
                 connection.commit();
             } catch (SQLException e) {
-                // TODO: 16/11/2017 refactor this
-                e.printStackTrace();
+                logger.error("Unexpected error while performing commit to database.", e);
             }
         }
     }

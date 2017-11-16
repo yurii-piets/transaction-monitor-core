@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-// TODO: 16/11/2017 think about better name
 public class DataConnectionManager {
 
     private final ConfigurableApplicationContext applicationContext;
@@ -41,7 +40,7 @@ public class DataConnectionManager {
         return connectionsSet;
     }
 
-    public Connection getConnectionByQualifier(String qualifier) {
+    public Connection getConnectionByQualifier(String qualifier) throws SQLException {
         if(cachedConnections.containsKey(qualifier)) {
             Connection connection = cachedConnections.get(qualifier);
             return connection;
@@ -53,14 +52,9 @@ public class DataConnectionManager {
         }
 
 
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-        } catch (SQLException e) {
-            // TODO: 16/11/2017 refactor this
-            e.printStackTrace();
-        }
+        Connection connection = dataSource.getConnection();
         cachedConnections.put(qualifier, connection);
+
         return connection;
     }
 
