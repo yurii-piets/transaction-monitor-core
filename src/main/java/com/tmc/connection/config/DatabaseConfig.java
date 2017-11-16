@@ -1,6 +1,6 @@
-package com.tmc.config;
+package com.tmc.connection.config;
 
-import com.tmc.services.DatabasePropertyService;
+import com.tmc.connection.services.DatabasePropertyService;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -44,14 +44,14 @@ public class DatabaseConfig {
     }
 
     private DataSource dataSource(String qualifier) {
-        BasicDataSource ds = new BasicDataSource();
+        BasicDataSource basicDataSource = new BasicDataSource();
 
-        ds.setUrl(getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setUsername(getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setPassword(getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        ds.setDriverClassName(getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setUrl(getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setUsername(getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setPassword(getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setDriverClassName(getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
 
-        return ds;
+        return basicDataSource;
     }
 
     private String getRequiredProperty(String key){

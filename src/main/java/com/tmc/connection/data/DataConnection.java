@@ -1,4 +1,4 @@
-package com.tmc.data;
+package com.tmc.connection.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
