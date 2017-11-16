@@ -37,10 +37,6 @@ public class DatabaseCommandExecutor implements CommandsExecutor {
     @Override
     public void executeCommands() throws SQLException {
         for (Command command : commands) {
-            if (!(command instanceof RevertibleCommand)) {
-                continue;
-            }
-
             command.execute();
 
             applied.addFirst(command);
@@ -51,10 +47,13 @@ public class DatabaseCommandExecutor implements CommandsExecutor {
     @Override
     public void revertCommands() {
         for (Command command : applied) {
-            try {
-                command.revert();
-            } catch (SQLException e) {
-                logger.error("Unexpected database error while applying rollback.");
+            if (command instanceof RevertibleCommand) {
+                RevertibleCommand revertibleCommand = (RevertibleCommand) command;
+                try {
+                    revertibleCommand.revert();
+                } catch (SQLException e) {
+                    logger.error("Unexpected database error while applying rollback: " + e.getMessage());
+                }
             }
         }
     }

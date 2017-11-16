@@ -14,14 +14,14 @@ import java.util.Set;
 
 @Component
 // TODO: 16/11/2017 think about better name
-public class DataConnection {
+public class DataConnectionManager {
 
     private final ConfigurableApplicationContext applicationContext;
 
     private final Map<String, Connection> cachedConnections = new HashMap<>();
 
     @Autowired
-    public DataConnection(ConfigurableApplicationContext applicationContext) {
+    public DataConnectionManager(ConfigurableApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 

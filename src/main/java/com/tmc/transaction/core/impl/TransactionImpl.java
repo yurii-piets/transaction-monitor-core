@@ -1,6 +1,6 @@
 package com.tmc.transaction.core.impl;
 
-import com.tmc.connection.data.DataConnection;
+import com.tmc.connection.data.DataConnectionManager;
 import com.tmc.connection.services.DatabasePropertyService;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
@@ -25,28 +25,28 @@ public class TransactionImpl implements Transaction {
 
     private final CommandsExecutor executor = new DatabaseCommandExecutor();
 
-    private final DataConnection dataConnection;
+    private final DataConnectionManager dataConnectionManager;
 
     private final Set<String> activeQualifiers = new HashSet<>();
 
     private final DatabasePropertyService databasePropertyService;
 
     @Autowired
-    public TransactionImpl(DataConnection dataConnection, DatabasePropertyService databasePropertyService) {
-        this.dataConnection = dataConnection;
+    public TransactionImpl(DataConnectionManager dataConnectionManager, DatabasePropertyService databasePropertyService) {
+        this.dataConnectionManager = dataConnectionManager;
         this.databasePropertyService = databasePropertyService;
     }
 
     @Override
     public void begin(String... qualifiers) throws SQLException {
         if (qualifiers == null || qualifiers.length == 0) {
-            for (Connection connection : dataConnection.getAllConnections()) {
+            for (Connection connection : dataConnectionManager.getAllConnections()) {
                 turnOffAutoCommit(connection);
                 activeQualifiers.addAll(databasePropertyService.getQualifiers());
             }
         } else {
             for (String qualifier : qualifiers) {
-                Connection connection = dataConnection.getConnectionByQualifier(qualifier);
+                Connection connection = dataConnectionManager.getConnectionByQualifier(qualifier);
                 turnOffAutoCommit(connection);
                 activeQualifiers.add(qualifier);
             }
@@ -55,7 +55,7 @@ public class TransactionImpl implements Transaction {
 
     @Override
     public void addStatement(String qualifier, String sql) throws SQLException {
-        Connection connection = dataConnection.getConnectionByQualifier(qualifier);
+        Connection connection = dataConnectionManager.getConnectionByQualifier(qualifier);
         Command command = new DatabaseCommand(connection, sql);
         executor.addCommand(command);
     }
@@ -78,7 +78,7 @@ public class TransactionImpl implements Transaction {
 
     private void commitForAll() {
         for (String qualifier: activeQualifiers){
-            Connection connection = dataConnection.getConnectionByQualifier(qualifier);
+            Connection connection = dataConnectionManager.getConnectionByQualifier(qualifier);
             try {
                 connection.commit();
             } catch (SQLException e) {

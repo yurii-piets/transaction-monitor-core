@@ -4,5 +4,4 @@ import java.sql.SQLException;
 
 public interface Command {
     void execute() throws SQLException;
-    void revert() throws SQLException;
 }
