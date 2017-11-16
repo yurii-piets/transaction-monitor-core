@@ -10,6 +10,8 @@ import com.tmc.transaction.executor.impl.DatabaseCommandExecutor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
@@ -18,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-// TODO: 16/11/2017 add scope mode
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
