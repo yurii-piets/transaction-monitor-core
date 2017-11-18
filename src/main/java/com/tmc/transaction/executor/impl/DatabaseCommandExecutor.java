@@ -36,17 +36,17 @@ public class DatabaseCommandExecutor implements CommandsExecutor {
 
     @Override
     public void executeCommands() throws SQLException {
-        for (Command command : commands) {
+        while(!commands.isEmpty()){
+            Command command = commands.poll();
             command.execute();
-
             applied.addFirst(command);
-            commands.remove(command);
         }
     }
 
     @Override
     public void revertCommands() {
-        for (Command command : applied) {
+        while (!applied.isEmpty()){
+            Command command = applied.pollFirst();
             if (command instanceof RevertibleCommand) {
                 RevertibleCommand revertibleCommand = (RevertibleCommand) command;
                 try {
