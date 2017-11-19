@@ -1,5 +1,6 @@
 package com.tmc;
 
+import com.tmc.transaction.service.TransactionService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -11,7 +12,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class TMConfig {
 
-    public static ConfigurableApplicationContext boot(String[] args) {
-        return SpringApplication.run(TMConfig.class, args);
+    public static TransactionService boot(String... args) {
+        ConfigurableApplicationContext applicationContext = SpringApplication.run(TMConfig.class, args);
+        return new TransactionService(applicationContext);
     }
 }

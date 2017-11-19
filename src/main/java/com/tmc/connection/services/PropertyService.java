@@ -1,6 +1,6 @@
-package com.tmc.services;
+package com.tmc.connection.services;
 
-import com.tmc.annotation.DatabaseProperty;
+import com.tmc.connection.annotation.DatabaseProperty;
 import org.reflections.Reflections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class DatabasePropertyService {
+public class PropertyService {
 
     @Bean
     public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
