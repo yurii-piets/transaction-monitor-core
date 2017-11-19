@@ -1,6 +1,6 @@
 package com.tmc;
 
-import com.tmc.transaction.factory.TransactionService;
+import com.tmc.transaction.service.TransactionService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
