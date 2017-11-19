@@ -1,6 +1,6 @@
 package com.tmc.connection.config;
 
-import com.tmc.connection.services.DatabasePropertyService;
+import com.tmc.connection.services.PropertyService;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,22 +22,22 @@ public class DatabaseConfig {
 
     private final ConfigurableBeanFactory configurableBeanFactory;
 
-    private final DatabasePropertyService databasePropertyService;
+    private final PropertyService propertyService;
 
     private final PropertySourcesPlaceholderConfigurer pspc;
 
     @Autowired
     public DatabaseConfig(ConfigurableBeanFactory configurableBeanFactory,
-                          DatabasePropertyService databasePropertyService,
+                          PropertyService propertyService,
                           PropertySourcesPlaceholderConfigurer pspc) {
         this.configurableBeanFactory = configurableBeanFactory;
-        this.databasePropertyService = databasePropertyService;
+        this.propertyService = propertyService;
         this.pspc = pspc;
     }
 
     @PostConstruct
     public void configure() {
-        for (String qualifier : databasePropertyService.getQualifiers()) {
+        for (String qualifier : propertyService.getQualifiers()) {
             DataSource dataSource = dataSource(qualifier);
             configurableBeanFactory.registerSingleton(qualifier, dataSource);
         }
@@ -54,20 +54,20 @@ public class DatabaseConfig {
         return basicDataSource;
     }
 
-    private String getRequiredProperty(String key){
-        if(!pspc.getAppliedPropertySources().contains("localProperties")) {
-            throw new IllegalStateException("localProperties" + " are not defined");
+    private String getRequiredProperty(String key) {
+        if (!pspc.getAppliedPropertySources().contains("localProperties")) {
+            throw new IllegalStateException("localProperties are not defined");
         }
 
         PropertySource<?> localProperties = pspc.getAppliedPropertySources().get("localProperties");
 
-        if(!localProperties.containsProperty(key)){
+        if (!localProperties.containsProperty(key)) {
             throw new IllegalStateException("Property [\"" + key + "\"] is not defined");
         }
 
         Object propertyValue = localProperties.getProperty(key);
 
-        if(propertyValue == null){
+        if (propertyValue == null) {
             throw new IllegalStateException("Property [\"" + key + "\"] has null value");
         }
 

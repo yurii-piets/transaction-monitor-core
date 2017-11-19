@@ -1,6 +1,6 @@
 package com.tmc;
 
-import com.tmc.transaction.factory.TransactionFactory;
+import com.tmc.transaction.factory.TransactionService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -12,8 +12,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class TMConfig {
 
-    public static TransactionFactory boot(String... args) {
+    public static TransactionService boot(String... args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(TMConfig.class, args);
-        return new TransactionFactory(applicationContext);
+        return new TransactionService(applicationContext);
     }
 }

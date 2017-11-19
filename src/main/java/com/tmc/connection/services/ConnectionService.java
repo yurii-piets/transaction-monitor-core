@@ -1,4 +1,4 @@
-package com.tmc.connection.data;
+package com.tmc.connection.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class DataConnectionManager {
+public class ConnectionService {
 
     private final ConfigurableApplicationContext applicationContext;
 
     private final Map<String, Connection> cachedConnections = new HashMap<>();
 
     @Autowired
-    public DataConnectionManager(ConfigurableApplicationContext applicationContext) {
+    public ConnectionService(ConfigurableApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -28,8 +28,8 @@ public class DataConnectionManager {
         Map<String, DataSource> dataSourcesBeans = applicationContext.getBeansOfType(DataSource.class);
         Set<Connection> connectionsSet = new HashSet<>();
 
-        for (String key: dataSourcesBeans.keySet()){
-            if(cachedConnections.containsKey(key)) {
+        for (String key : dataSourcesBeans.keySet()) {
+            if (cachedConnections.containsKey(key)) {
                 connectionsSet.add(cachedConnections.get(key));
             } else {
                 cachedConnections.put(key, cachedConnections.get(key));
@@ -41,13 +41,13 @@ public class DataConnectionManager {
     }
 
     public Connection getConnectionByQualifier(String qualifier) throws SQLException {
-        if(cachedConnections.containsKey(qualifier)) {
+        if (cachedConnections.containsKey(qualifier)) {
             Connection connection = cachedConnections.get(qualifier);
             return connection;
         }
 
         DataSource dataSource = applicationContext.getBean(qualifier, DataSource.class);
-        if(dataSource == null) {
+        if (dataSource == null) {
             throw new IllegalArgumentException("Database qualifier: [" + qualifier + "] does not exist");
         }
 
@@ -58,7 +58,7 @@ public class DataConnectionManager {
         return connection;
     }
 
-    public void clearCache(){
+    public void clearCache() {
         cachedConnections.clear();
     }
 }
