@@ -1,58 +1,30 @@
 package com.tmc.connection.services;
 
 import com.tmc.connection.annotation.DatabaseProperty;
+import lombok.Getter;
 import org.reflections.Reflections;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class PropertyService {
 
-    @Bean
-    public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-        Resource[] resources = getResources().toArray(new Resource[]{});
-        pspc.setLocations(resources);
-        pspc.setIgnoreUnresolvablePlaceholders(true);
-        return pspc;
-    }
+    @Getter
+    private Set<String> qualifiers;
 
-    /**
-     * Searches for all classed annotated with @DatabaseProperty, get value of interface
-     * and creates a list of resource files where configuration of database should be
-     *
-     * @see DatabaseProperty
-     */
-    private Set<Resource> getResources() {
+    @PostConstruct
+    public void initQualifiers() {
         Reflections reflections = new Reflections();
         Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
 
-        Set<Resource> configurationResources = configs.stream()
-                .map(c -> c.getAnnotation(DatabaseProperty.class))
-                .map(DatabaseProperty::value)
-                .map(ClassPathResource::new)
-                .collect(Collectors.toSet());
-
-        return configurationResources;
-    }
-
-    public Set<String> getQualifiers() {
-        Reflections reflections = new Reflections();
-        Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
-
-        Set<String> qualifiers = configs.stream()
+        this.qualifiers = configs.stream()
                 .map(c -> c.getAnnotation(DatabaseProperty.class))
                 .map(DatabaseProperty::qualifiers)
                 .flatMap(Arrays::stream)
                 .collect(Collectors.toSet());
-
-        return qualifiers;
     }
 }

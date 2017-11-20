@@ -15,6 +15,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -116,6 +117,19 @@ public class TransactionImpl implements Transaction {
         }
 
         return this;
+    }
+
+    @PreDestroy
+    public void finalize() {
+        for (String qualifier: propertyService.getQualifiers()){
+            try {
+                Connection connection = connectionService.getConnectionByQualifier(qualifier);
+                connection.close();
+            } catch (SQLException e) {
+                logger.error("Unexpected error while closing connection", e);
+            }
+        }
+        connectionService.clearCache();
     }
 
     private void commitForAll() throws SQLException {
