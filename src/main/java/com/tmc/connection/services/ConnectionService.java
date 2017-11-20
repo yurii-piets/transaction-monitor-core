@@ -2,7 +2,7 @@ package com.tmc.connection.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Component
+@Service
 public class ConnectionService {
 
     private final ConfigurableApplicationContext applicationContext;
