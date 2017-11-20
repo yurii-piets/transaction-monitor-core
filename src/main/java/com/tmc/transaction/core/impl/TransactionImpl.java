@@ -4,6 +4,7 @@ import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
+import com.tmc.transaction.core.def.And;
 import com.tmc.transaction.core.def.Transaction;
 import com.tmc.transaction.executor.def.CommandsExecutor;
 import com.tmc.transaction.executor.impl.DatabaseCommandExecutor;
@@ -41,7 +42,7 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public void begin(String... qualifiers) throws SQLException {
+    public And begin(String... qualifiers) throws SQLException {
         if (qualifiers == null || qualifiers.length == 0) {
             for (Connection connection : connectionService.getAllConnections()) {
                 turnOffAutoCommit(connection);
@@ -54,17 +55,19 @@ public class TransactionImpl implements Transaction {
                 activeQualifiers.add(qualifier);
             }
         }
+        return this;
     }
 
     @Override
-    public void addStatement(String qualifier, String sql) throws SQLException {
+    public And addStatement(String qualifier, String sql) throws SQLException {
         Connection connection = connectionService.getConnectionByQualifier(qualifier);
         Command command = new DatabaseCommand(connection, sql);
         executor.addCommand(command);
+        return this;
     }
 
     @Override
-    public void commit() {
+    public And commit() {
         try {
             executor.executeCommands();
             commitForAll();
@@ -73,6 +76,8 @@ public class TransactionImpl implements Transaction {
             executor.revertCommands();
             logger.info("Applied revert on databases.");
         }
+
+        return this;
     }
 
     private void turnOffAutoCommit(Connection connection) throws SQLException {
@@ -91,7 +96,8 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public void rollback() {
+    public And rollback() {
         executor.revertCommands();
+        return this;
     }
 }
