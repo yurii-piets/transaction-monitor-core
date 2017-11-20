@@ -10,7 +10,6 @@ public interface Transaction extends And {
     And addStatement(String qualifier, String sql) throws SQLException;
     And addStatement(String qualifier, File sql) throws SQLException;
     And addStatement(String qualifier, Path sql) throws SQLException;
-    And rollback();
 
-    default Transaction and() { return this;}
+    default Transaction and() { return this; }
 }

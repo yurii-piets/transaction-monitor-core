@@ -118,12 +118,6 @@ public class TransactionImpl implements Transaction {
         return this;
     }
 
-    @Override
-    public And rollback() {
-        executor.revertCommands();
-        return this;
-    }
-
     private void commitForAll() throws SQLException {
         for (String qualifier : activeQualifiers) {
             Connection connection = connectionService.getConnectionByQualifier(qualifier);
