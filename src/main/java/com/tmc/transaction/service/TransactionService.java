@@ -11,7 +11,7 @@ public class TransactionService {
         this.applicationContext = applicationContext;
     }
 
-    public Transaction getTransaction() {
+    public Transaction newTransaction() {
         return applicationContext.getBean(Transaction.class);
     }
 }

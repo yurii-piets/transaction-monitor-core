@@ -31,13 +31,13 @@ public class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
-    private final CommandsExecutor executor = new DatabaseCommandExecutor();
-
     private final ConnectionService connectionService;
 
-    private final Set<String> activeQualifiers = new HashSet<>();
-
     private final PropertyService propertyService;
+
+    private final CommandsExecutor executor = new DatabaseCommandExecutor();
+
+    private final Set<String> activeQualifiers = new HashSet<>();
 
     @Autowired
     public TransactionImpl(ConnectionService connectionService,
@@ -67,7 +67,9 @@ public class TransactionImpl implements Transaction {
     public And addStatement(String qualifier, String query) throws SQLException {
         Connection connection = connectionService.getConnectionByQualifier(qualifier);
 
-        Command command = new DatabaseCommand(connection, query);
+        String filteredQuery = filterQuery(query);
+
+        Command command = new DatabaseCommand(connection, filteredQuery);
         executor.addCommand(command);
 
         return this;
@@ -78,7 +80,7 @@ public class TransactionImpl implements Transaction {
         try {
             String query = Files.readAllLines(file.toPath())
                     .stream()
-                    .collect(Collectors.joining("\n"));
+                    .collect(Collectors.joining());
             addStatement(qualifier, query);
         } catch (IOException e) {
             logger.error("Unexpected: ", e);
@@ -92,7 +94,7 @@ public class TransactionImpl implements Transaction {
         try {
             String query = Files.readAllLines(path)
                     .stream()
-                    .collect(Collectors.joining("\n"));
+                    .collect(Collectors.joining());
 
             addStatement(qualifier, query);
         } catch (IOException e) {
@@ -116,8 +118,10 @@ public class TransactionImpl implements Transaction {
         return this;
     }
 
-    private void turnOffAutoCommit(Connection connection) throws SQLException {
-        connection.setAutoCommit(false);
+    @Override
+    public And rollback() {
+        executor.revertCommands();
+        return this;
     }
 
     private void commitForAll() throws SQLException {
@@ -131,9 +135,14 @@ public class TransactionImpl implements Transaction {
         }
     }
 
-    @Override
-    public And rollback() {
-        executor.revertCommands();
-        return this;
+    private void turnOffAutoCommit(Connection connection) throws SQLException {
+        connection.setAutoCommit(false);
+    }
+
+    private String filterQuery(String query) {
+        String filteredQuery = query
+                .replace("begin;", "")
+                .replace("commit;", "");
+        return filteredQuery;
     }
 }
