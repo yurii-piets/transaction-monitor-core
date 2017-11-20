@@ -15,10 +15,15 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -59,10 +64,41 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, String sql) throws SQLException {
+    public And addStatement(String qualifier, String query) throws SQLException {
         Connection connection = connectionService.getConnectionByQualifier(qualifier);
-        Command command = new DatabaseCommand(connection, sql);
+
+        Command command = new DatabaseCommand(connection, query);
         executor.addCommand(command);
+
+        return this;
+    }
+
+    @Override
+    public And addStatement(String qualifier, File file) throws SQLException {
+        try {
+            String query = Files.readAllLines(file.toPath())
+                    .stream()
+                    .collect(Collectors.joining("\n"));
+            addStatement(qualifier, query);
+        } catch (IOException e) {
+            logger.error("Unexpected: ", e);
+        }
+
+        return this;
+    }
+
+    @Override
+    public And addStatement(String qualifier, Path path) throws SQLException {
+        try {
+            String query = Files.readAllLines(path)
+                    .stream()
+                    .collect(Collectors.joining("\n"));
+
+            addStatement(qualifier, query);
+        } catch (IOException e) {
+            logger.error("Unexpected: ", e);
+        }
+
         return this;
     }
 
