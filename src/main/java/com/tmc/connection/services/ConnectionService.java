@@ -12,6 +12,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Manages the Connection to Databases
+ *
+ * @see Connection
+ * @see DataSource
+ */
 @Service
 public class ConnectionService {
 
@@ -24,6 +30,15 @@ public class ConnectionService {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * @return Set of Connection to all databases specified by qualifier in @DatabaseProperty
+     *
+     * if connection was already requested takes it from a cache
+     * if not creates new instances of connection and out it into cache
+     *
+     * @see com.tmc.connection.annotation.DatabaseProperty
+     * @see Connection
+     */
     public Set<Connection> getAllConnections() {
         Map<String, DataSource> dataSourcesBeans = applicationContext.getBeansOfType(DataSource.class);
         Set<Connection> connectionsSet = new HashSet<>();
@@ -40,6 +55,17 @@ public class ConnectionService {
         return connectionsSet;
     }
 
+    /**
+     * If connection to qualified database was already requested takes it from cache
+     * or else establish new connection with database
+     *
+     * @param qualifier to specify with wich database Connection is requested
+     * @return instance of Connection
+     * @throws SQLException if connection with database could not be established
+     *
+     * @see Connection
+     * @see com.tmc.connection.annotation.DatabaseProperty
+     */
     public Connection getConnectionByQualifier(String qualifier) throws SQLException {
         if (cachedConnections.containsKey(qualifier)) {
             Connection connection = cachedConnections.get(qualifier);
@@ -58,6 +84,9 @@ public class ConnectionService {
         return connection;
     }
 
+    /**
+     * Empty cache of Connection
+     */
     public void clearCache() {
         cachedConnections.clear();
     }

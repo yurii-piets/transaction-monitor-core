@@ -24,7 +24,7 @@ public class PropertyConfig {
     }
 
     /**
-     * Searches for all classed annotated with @DatabaseProperty, get value of interface
+     * Searches for all classed annotated with @DatabaseProperty, get path of interface
      * and creates a list of resource files where configuration of database should be
      *
      * @see DatabaseProperty
@@ -35,7 +35,7 @@ public class PropertyConfig {
 
         Set<Resource> configurationResources = configs.stream()
                 .map(c -> c.getAnnotation(DatabaseProperty.class))
-                .map(DatabaseProperty::value)
+                .map(DatabaseProperty::path)
                 .map(ClassPathResource::new)
                 .collect(Collectors.toSet());
 

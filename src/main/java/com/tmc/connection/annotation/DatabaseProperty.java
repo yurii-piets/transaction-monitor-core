@@ -14,9 +14,14 @@ import java.lang.annotation.Target;
 public @interface DatabaseProperty {
 
     /**
-     * Put as value path to database configuration file
+     * Specifies path to database configuration property file
      */
-    String value() default "";
+    String path() default "";
 
+    /**
+     * Specifies qualifiers of each database
+     * Put all prefixes for database configuration properties
+     * Also all databases is reachable by specified qualifier
+     */
     String[] qualifiers() default {};
 }

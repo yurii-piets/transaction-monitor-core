@@ -10,12 +10,24 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Search and contains qualifiers that user had specified
+ *
+ * @see DatabaseProperty
+ */
 @Service
 public class PropertyService {
 
+    /**
+     * Set of qualifiers specified by user
+     */
     @Getter
     private Set<String> qualifiers;
 
+    /**
+     * Using reflection searches for usage of @DatabaseConfiguration
+     * and retries array of qualifiers specified by user
+     */
     @PostConstruct
     public void initQualifiers() {
         Reflections reflections = new Reflections();
