@@ -32,10 +32,9 @@ public class ConnectionService {
 
     /**
      * @return Set of Connection to all databases specified by qualifier in @DatabaseProperty
-     *
+     * <p>
      * if connection was already requested takes it from a cache
      * if not creates new instances of connection and out it into cache
-     *
      * @see com.tmc.connection.annotation.DatabaseProperty
      * @see Connection
      */
@@ -62,7 +61,6 @@ public class ConnectionService {
      * @param qualifier to specify with wich database Connection is requested
      * @return instance of Connection
      * @throws SQLException if connection with database could not be established
-     *
      * @see Connection
      * @see com.tmc.connection.annotation.DatabaseProperty
      */
@@ -85,7 +83,7 @@ public class ConnectionService {
     }
 
     /**
-     * Empty cache of Connection
+     * Empties cache of Connection
      */
     public void clearCache() {
         cachedConnections.clear();
