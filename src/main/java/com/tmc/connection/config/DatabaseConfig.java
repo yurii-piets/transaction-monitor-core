@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+/**
+ * Configuration of database
+ */
 @Component
 public class DatabaseConfig {
 
@@ -35,6 +38,11 @@ public class DatabaseConfig {
         this.pspc = pspc;
     }
 
+    /**
+     * Declares a DataSource Bean for each qualifier of a database
+     *
+     * @see DataSource
+     */
     @PostConstruct
     public void configure() {
         for (String qualifier : propertyService.getQualifiers()) {
@@ -43,6 +51,12 @@ public class DatabaseConfig {
         }
     }
 
+    /**
+     * Creates a DataSource instance for each qualifier of a database
+     *
+     * @return DataSource class instance
+     * @see DataSource
+     */
     private DataSource dataSource(String qualifier) {
         BasicDataSource basicDataSource = new BasicDataSource();
 
@@ -54,6 +68,13 @@ public class DatabaseConfig {
         return basicDataSource;
     }
 
+
+    /**
+     * Returns value of a property from configured properties files
+     *
+     * @param key - value is accessed by
+     * @return value of a property
+     */
     private String getRequiredProperty(String key) {
         if (!pspc.getAppliedPropertySources().contains("localProperties")) {
             throw new IllegalStateException("localProperties are not defined");
@@ -68,7 +89,7 @@ public class DatabaseConfig {
         Object propertyValue = localProperties.getProperty(key);
 
         if (propertyValue == null) {
-            throw new IllegalStateException("Property [\"" + key + "\"] has null value");
+            throw new IllegalStateException("Property [\"" + key + "\"] has null path");
         }
 
         return propertyValue.toString();

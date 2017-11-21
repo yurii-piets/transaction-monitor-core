@@ -24,8 +24,8 @@ public class TMConfigTest {
 
     @Test
     public void transactionsNotEquals() {
-        Transaction transaction1 = transactionService.getTransaction();
-        Transaction transaction2 = transactionService.getTransaction();
+        Transaction transaction1 = transactionService.newTransaction();
+        Transaction transaction2 = transactionService.newTransaction();
 
         assertNotEquals(transaction1, transaction2);
     }
