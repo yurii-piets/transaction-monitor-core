@@ -7,7 +7,6 @@ import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
 import com.tmc.transaction.core.def.Transaction;
 import com.tmc.transaction.executor.def.CommandsExecutor;
-import com.tmc.transaction.executor.impl.DatabaseCommandExecutor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TransactionImpl implements Transaction {
+class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -36,15 +35,17 @@ public class TransactionImpl implements Transaction {
 
     private final PropertyService propertyService;
 
-    private final CommandsExecutor executor = new DatabaseCommandExecutor();
+    private final CommandsExecutor executor;
 
     private final Set<String> activeQualifiers = new HashSet<>();
 
     @Autowired
     public TransactionImpl(ConnectionService connectionService,
-                           PropertyService propertyService) {
+                           PropertyService propertyService,
+                           CommandsExecutor executor) {
         this.connectionService = connectionService;
         this.propertyService = propertyService;
+        this.executor = executor;
     }
 
     @Override

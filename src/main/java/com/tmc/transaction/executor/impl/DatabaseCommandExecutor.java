@@ -5,13 +5,18 @@ import com.tmc.transaction.command.def.RevertibleCommand;
 import com.tmc.transaction.executor.def.CommandsExecutor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class DatabaseCommandExecutor implements CommandsExecutor {
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+class DatabaseCommandExecutor implements CommandsExecutor {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
