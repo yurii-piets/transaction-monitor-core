@@ -16,13 +16,18 @@ import java.util.Queue;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-// TODO: 21/11/2017 add javadoc
 class DatabaseCommandExecutor implements CommandsExecutor {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
+    /**
+     * Queue of command that will be executed on executeCommands method call
+     */
     private final Queue<Command> commands = new LinkedList<>();
 
+    /**
+     * Stack of commands that was executed with success
+     */
     private final Deque<Command> applied = new LinkedList<>();
 
     @Override

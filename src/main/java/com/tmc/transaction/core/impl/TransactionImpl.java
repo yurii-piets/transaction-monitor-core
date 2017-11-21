@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-// TODO: 21/11/2017 add javadoc
 class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
@@ -38,6 +37,9 @@ class TransactionImpl implements Transaction {
 
     private final CommandsExecutor executor;
 
+    /**
+     * Set  qualifiers od databases on which current transaction is performed
+     */
     private final Set<String> activeQualifiers = new HashSet<>();
 
     @Autowired
@@ -121,6 +123,10 @@ class TransactionImpl implements Transaction {
         return this;
     }
 
+    /**
+     * Method that should be called on Bean/object destruction
+     * close opened connection in current transaction
+     */
     @PreDestroy
     public void finalize() {
         for (String qualifier: propertyService.getQualifiers()){
@@ -134,6 +140,10 @@ class TransactionImpl implements Transaction {
         connectionService.clearCache();
     }
 
+    /**
+     * Performs commit on all databases that were specified by qualifier in current transaction
+     * @throws SQLException if connection with one of the databases could not be established
+     */
     private void commitForAll() throws SQLException {
         for (String qualifier : activeQualifiers) {
             Connection connection = connectionService.getConnectionByQualifier(qualifier);
@@ -145,10 +155,22 @@ class TransactionImpl implements Transaction {
         }
     }
 
+    /**
+     * Turns down auto commit options for connection
+     *
+     * @param connection for which auto-commit will be turned down
+     * @throws SQLException if auto-commit could not be turned down
+     */
     private void turnOffAutoCommit(Connection connection) throws SQLException {
         connection.setAutoCommit(false);
     }
 
+    /**
+     * Removes string "begin;" and "commit;" from query
+     *
+     * @param query that is filtered
+     * @return filtered query
+     */
     private String filterQuery(String query) {
         String filteredQuery = query
                 .replace("begin;", "")
