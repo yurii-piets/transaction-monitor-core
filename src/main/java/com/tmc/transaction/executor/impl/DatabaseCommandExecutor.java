@@ -16,6 +16,7 @@ import java.util.Queue;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+// TODO: 21/11/2017 add javadoc
 class DatabaseCommandExecutor implements CommandsExecutor {
 
     private final Logger logger = LogManager.getLogger(this.getClass());

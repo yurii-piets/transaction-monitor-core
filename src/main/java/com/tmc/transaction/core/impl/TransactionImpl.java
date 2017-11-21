@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+// TODO: 21/11/2017 add javadoc
 class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
