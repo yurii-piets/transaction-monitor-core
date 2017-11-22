@@ -2,6 +2,8 @@ package com.tmc.transaction.core.impl;
 
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
+import com.tmc.exception.SQLAutoCommitException;
+import com.tmc.exception.SQLQueryException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
@@ -52,7 +54,7 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And begin(String... qualifiers) throws SQLException {
+    public And begin(String... qualifiers) {
         if (qualifiers == null || qualifiers.length == 0) {
             for (Connection connection : connectionService.getAllConnections()) {
                 turnOffAutoCommit(connection);
@@ -69,7 +71,7 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, String query) throws SQLException {
+    public And addStatement(String qualifier, String query) {
         Connection connection = connectionService.getConnectionByQualifier(qualifier);
 
         String filteredQuery = filterQuery(query);
@@ -81,7 +83,7 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, File file) throws SQLException {
+    public And addStatement(String qualifier, File file) {
         try {
             String query = Files.readAllLines(file.toPath())
                     .stream()
@@ -95,7 +97,7 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, Path path) throws SQLException {
+    public And addStatement(String qualifier, Path path) {
         try {
             String query = Files.readAllLines(path)
                     .stream()
@@ -114,7 +116,7 @@ class TransactionImpl implements Transaction {
         try {
             executor.executeCommands();
             commitForAll();
-        } catch (SQLException e) {
+        } catch (SQLQueryException e) {
             logger.error(e.getMessage());
             executor.revertCommands();
             logger.info("Applied revert on databases.");
@@ -129,7 +131,7 @@ class TransactionImpl implements Transaction {
      */
     @PreDestroy
     public void finalize() {
-        for (String qualifier: propertyService.getQualifiers()){
+        for (String qualifier : propertyService.getQualifiers()) {
             try {
                 Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.close();
@@ -142,9 +144,8 @@ class TransactionImpl implements Transaction {
 
     /**
      * Performs commit on all databases that were specified by qualifier in current transaction
-     * @throws SQLException if connection with one of the databases could not be established
      */
-    private void commitForAll() throws SQLException {
+    private void commitForAll() {
         for (String qualifier : activeQualifiers) {
             Connection connection = connectionService.getConnectionByQualifier(qualifier);
             try {
@@ -159,10 +160,13 @@ class TransactionImpl implements Transaction {
      * Turns down auto commit options for connection
      *
      * @param connection for which auto-commit will be turned down
-     * @throws SQLException if auto-commit could not be turned down
      */
-    private void turnOffAutoCommit(Connection connection) throws SQLException {
-        connection.setAutoCommit(false);
+    private void turnOffAutoCommit(Connection connection) {
+        try {
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new SQLAutoCommitException(e);
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.tmc.connection.services;
 
+import com.tmc.exception.SQLConnectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
@@ -60,11 +61,10 @@ public class ConnectionService {
      *
      * @param qualifier to specify with wich database Connection is requested
      * @return instance of Connection
-     * @throws SQLException if connection with database could not be established
      * @see Connection
      * @see com.tmc.connection.annotation.DatabaseProperty
      */
-    public Connection getConnectionByQualifier(String qualifier) throws SQLException {
+    public Connection getConnectionByQualifier(String qualifier) {
         if (cachedConnections.containsKey(qualifier)) {
             Connection connection = cachedConnections.get(qualifier);
             return connection;
@@ -76,7 +76,12 @@ public class ConnectionService {
         }
 
 
-        Connection connection = dataSource.getConnection();
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new SQLConnectionException(e);
+        }
         cachedConnections.put(qualifier, connection);
 
         return connection;

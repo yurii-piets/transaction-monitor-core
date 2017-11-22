@@ -1,5 +1,9 @@
 package com.tmc.transaction.command.impl;
 
+import com.tmc.exception.SQLQueryException;
+import com.tmc.exception.SQLRevertException;
+import com.tmc.exception.SQLSavepointCreationException;
+import com.tmc.exception.SQLStatementException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
 import lombok.AllArgsConstructor;
@@ -46,24 +50,40 @@ public class DatabaseCommand implements RevertibleCommand {
      *
      * @see Statement
      * @see Savepoint
-     * @throws SQLException if sql query could not be executed
      */
     @Override
-    public void execute() throws SQLException {
-        savepoint = connection.setSavepoint();
+    public void execute() {
+        try {
+            savepoint = connection.setSavepoint();
+        } catch (SQLException e) {
+            throw new SQLSavepointCreationException(e);
+        }
 
-        Statement statement = connection.createStatement();
-        statement.execute(sql);
+        Statement statement;
+        try {
+            statement = connection.createStatement();
+        } catch (SQLException e) {
+            throw new SQLStatementException(e);
+        }
+
+        try {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            throw new SQLQueryException(e);
+        }
     }
 
     /**
      * Reverts execution of a command by releasing current savepoint
      *
      * @see Savepoint
-     * @throws SQLException in most cases if savepoint could not be released is current Transaction
      */
     @Override
-    public void revert() throws SQLException {
-        connection.releaseSavepoint(savepoint);
+    public void revert() {
+        try {
+            connection.releaseSavepoint(savepoint);
+        } catch (SQLException e) {
+            throw new SQLRevertException(e);
+        }
     }
 }
