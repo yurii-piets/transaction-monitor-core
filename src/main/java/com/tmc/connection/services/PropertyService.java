@@ -3,6 +3,7 @@ package com.tmc.connection.services;
 import com.tmc.connection.annotation.DatabaseProperty;
 import lombok.Getter;
 import org.reflections.Reflections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -24,13 +25,19 @@ public class PropertyService {
     @Getter
     private Set<String> qualifiers;
 
+    private final Reflections reflections;
+
+    @Autowired
+    public PropertyService(Reflections reflections) {
+        this.reflections = reflections;
+    }
+
     /**
      * Using reflection searches for usage of @DatabaseConfiguration
      * and retries array of qualifiers specified by user
      */
     @PostConstruct
     public void initQualifiers() {
-        Reflections reflections = new Reflections();
         Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
 
         this.qualifiers = configs.stream()
