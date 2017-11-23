@@ -1,5 +1,6 @@
 package com.tmc.transaction.executor.impl;
 
+import com.tmc.exception.SQLRevertException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
 import com.tmc.transaction.executor.def.CommandsExecutor;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -46,7 +46,7 @@ class DatabaseCommandExecutor implements CommandsExecutor {
     }
 
     @Override
-    public void executeCommands() throws SQLException {
+    public void executeCommands() throws Exception {
         while (!commands.isEmpty()) {
             Command command = commands.poll();
             command.execute();
@@ -62,8 +62,8 @@ class DatabaseCommandExecutor implements CommandsExecutor {
                 RevertibleCommand revertibleCommand = (RevertibleCommand) command;
                 try {
                     revertibleCommand.revert();
-                } catch (SQLException e) {
-                    logger.error("Unexpected database error while applying rollback: " + e.getMessage());
+                } catch (Exception e) {
+                    logger.error("Unexpected: ", e);
                 }
             }
         }

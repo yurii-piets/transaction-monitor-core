@@ -2,8 +2,6 @@ package com.tmc.transaction.executor.def;
 
 import com.tmc.transaction.command.def.Command;
 
-import java.sql.SQLException;
-
 public interface CommandsExecutor {
 
     /**
@@ -32,8 +30,7 @@ public interface CommandsExecutor {
     /**
      * Executes one-by-one command from the collection of the commands
      */
-    // TODO: 21/11/2017 remove SQLException
-    void executeCommands() throws SQLException;
+    void executeCommands() throws Exception;
 
     /**
      * Revert one-by-one command from the collection of the executed commands
