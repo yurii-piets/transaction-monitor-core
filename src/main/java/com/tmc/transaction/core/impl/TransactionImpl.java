@@ -2,6 +2,8 @@ package com.tmc.transaction.core.impl;
 
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
+import com.tmc.exception.SQLAutoCommitException;
+import com.tmc.exception.SQLConnectionException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
@@ -52,42 +54,37 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And begin(String... qualifiers) throws SQLException {
-        if (qualifiers == null || qualifiers.length == 0) {
-            for (Connection connection : connectionService.getAllConnections()) {
-                turnOffAutoCommit(connection);
-                activeQualifiers.addAll(propertyService.getQualifiers());
+    public And begin(String... qualifiers) {
+        try {
+
+            if (qualifiers == null || qualifiers.length == 0) {
+                for (Connection connection : connectionService.getAllConnections()) {
+                    turnOffAutoCommit(connection);
+                    activeQualifiers.addAll(propertyService.getQualifiers());
+                }
+            } else {
+                for (String qualifier : qualifiers) {
+                    Connection connection = connectionService.getConnectionByQualifier(qualifier);
+                    turnOffAutoCommit(connection);
+                    activeQualifiers.add(qualifier);
+                }
             }
-        } else {
-            for (String qualifier : qualifiers) {
-                Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                turnOffAutoCommit(connection);
-                activeQualifiers.add(qualifier);
-            }
+        } catch (SQLAutoCommitException | SQLConnectionException e) {
+            logger.error("Unexpected: ", e);
         }
         return this;
     }
 
     @Override
-    public And addStatement(String qualifier, String query) throws SQLException {
-        Connection connection = connectionService.getConnectionByQualifier(qualifier);
-
-        String filteredQuery = filterQuery(query);
-
-        Command command = new DatabaseCommand(connection, filteredQuery);
-        executor.addCommand(command);
-
-        return this;
-    }
-
-    @Override
-    public And addStatement(String qualifier, File file) throws SQLException {
+    public And addStatement(String qualifier, String query) {
         try {
-            String query = Files.readAllLines(file.toPath())
-                    .stream()
-                    .collect(Collectors.joining());
-            addStatement(qualifier, query);
-        } catch (IOException e) {
+            Connection connection = connectionService.getConnectionByQualifier(qualifier);
+
+            String filteredQuery = filterQuery(query);
+
+            Command command = new DatabaseCommand(connection, filteredQuery);
+            executor.addCommand(command);
+        } catch (SQLConnectionException e) {
             logger.error("Unexpected: ", e);
         }
 
@@ -95,17 +92,22 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, Path path) throws SQLException {
-        try {
-            String query = Files.readAllLines(path)
-                    .stream()
-                    .collect(Collectors.joining());
+    public And addStatement(String qualifier, File file) throws IOException {
+        String query = Files.readAllLines(file.toPath())
+                .stream()
+                .collect(Collectors.joining());
+        addStatement(qualifier, query);
 
-            addStatement(qualifier, query);
-        } catch (IOException e) {
-            logger.error("Unexpected: ", e);
-        }
+        return this;
+    }
 
+    @Override
+    public And addStatement(String qualifier, Path path) throws IOException {
+        String query = Files.readAllLines(path)
+                .stream()
+                .collect(Collectors.joining());
+
+        addStatement(qualifier, query);
         return this;
     }
 
@@ -114,10 +116,8 @@ class TransactionImpl implements Transaction {
         try {
             executor.executeCommands();
             commitForAll();
-        } catch (SQLException e) {
-            logger.error(e.getMessage());
-            executor.revertCommands();
-            logger.info("Applied revert on databases.");
+        } catch (Exception e) {
+            logger.error("Unexpected:" + e.getLocalizedMessage(), e.getCause());
         }
 
         return this;
@@ -129,12 +129,14 @@ class TransactionImpl implements Transaction {
      */
     @PreDestroy
     public void finalize() {
-        for (String qualifier: propertyService.getQualifiers()){
+        for (String qualifier : propertyService.getQualifiers()) {
             try {
                 Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.close();
             } catch (SQLException e) {
                 logger.error("Unexpected error while closing connection", e);
+            } catch (SQLConnectionException e) {
+                logger.error("Unexpected: ", e);
             }
         }
         connectionService.clearCache();
@@ -142,15 +144,14 @@ class TransactionImpl implements Transaction {
 
     /**
      * Performs commit on all databases that were specified by qualifier in current transaction
-     * @throws SQLException if connection with one of the databases could not be established
      */
-    private void commitForAll() throws SQLException {
+    private void commitForAll() {
         for (String qualifier : activeQualifiers) {
-            Connection connection = connectionService.getConnectionByQualifier(qualifier);
             try {
+                Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.commit();
-            } catch (SQLException e) {
-                logger.error("Unexpected error while performing commit to database.", e);
+            } catch (SQLException | SQLConnectionException e) {
+                logger.error("Unexpected: ", e);
             }
         }
     }
@@ -159,10 +160,13 @@ class TransactionImpl implements Transaction {
      * Turns down auto commit options for connection
      *
      * @param connection for which auto-commit will be turned down
-     * @throws SQLException if auto-commit could not be turned down
      */
-    private void turnOffAutoCommit(Connection connection) throws SQLException {
-        connection.setAutoCommit(false);
+    private void turnOffAutoCommit(Connection connection) throws SQLAutoCommitException {
+        try {
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new SQLAutoCommitException(e);
+        }
     }
 
     /**
