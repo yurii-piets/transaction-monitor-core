@@ -76,25 +76,15 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, String query) throws SQLConnectionException {
-        Connection connection = connectionService.getConnectionByQualifier(qualifier);
-
-        String filteredQuery = filterQuery(query);
-
-        Command command = new DatabaseCommand(connection, filteredQuery);
-        executor.addCommand(command);
-
-        return this;
-    }
-
-    @Override
-    public And addStatement(String qualifier, File file) {
+    public And addStatement(String qualifier, String query) {
         try {
-            String query = Files.readAllLines(file.toPath())
-                    .stream()
-                    .collect(Collectors.joining());
-            addStatement(qualifier, query);
-        } catch (IOException | SQLConnectionException e) {
+            Connection connection = connectionService.getConnectionByQualifier(qualifier);
+
+            String filteredQuery = filterQuery(query);
+
+            Command command = new DatabaseCommand(connection, filteredQuery);
+            executor.addCommand(command);
+        } catch (SQLConnectionException e) {
             logger.error("Unexpected: ", e);
         }
 
@@ -102,17 +92,22 @@ class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, Path path) {
-        try {
-            String query = Files.readAllLines(path)
-                    .stream()
-                    .collect(Collectors.joining());
+    public And addStatement(String qualifier, File file) throws IOException {
+        String query = Files.readAllLines(file.toPath())
+                .stream()
+                .collect(Collectors.joining());
+        addStatement(qualifier, query);
 
-            addStatement(qualifier, query);
-        } catch (IOException | SQLConnectionException e) {
-            logger.error("Unexpected: ", e);
-        }
+        return this;
+    }
 
+    @Override
+    public And addStatement(String qualifier, Path path) throws IOException {
+        String query = Files.readAllLines(path)
+                .stream()
+                .collect(Collectors.joining());
+
+        addStatement(qualifier, query);
         return this;
     }
 

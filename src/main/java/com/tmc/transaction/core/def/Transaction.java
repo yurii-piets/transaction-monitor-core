@@ -1,8 +1,7 @@
 package com.tmc.transaction.core.def;
 
-import com.tmc.exception.SQLConnectionException;
-
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -24,7 +23,7 @@ public interface Transaction extends And {
      * @param qualifier of database on which current query will be executed
      * @param query query that will be executed
      */
-    And addStatement(String qualifier, String query) throws SQLConnectionException;
+    And addStatement(String qualifier, String query);
 
     /**
      * Add queries that will be executed in current transaction
@@ -32,7 +31,7 @@ public interface Transaction extends And {
      * @param qualifier of database on which current queries will be executed
      * @param file instance of file that contains sql queries
      */
-    And addStatement(String qualifier, File file);
+    And addStatement(String qualifier, File file) throws IOException;
 
     /**
      * Add queries that will be executed in current transaction
@@ -42,7 +41,7 @@ public interface Transaction extends And {
      *
      * @see Path
      */
-    And addStatement(String qualifier, Path path);
+    And addStatement(String qualifier, Path path) throws IOException;
 
     /**
      * Commits queries to all databases
