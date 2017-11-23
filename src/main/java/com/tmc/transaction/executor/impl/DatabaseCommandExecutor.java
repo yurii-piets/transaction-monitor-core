@@ -46,7 +46,7 @@ class DatabaseCommandExecutor implements CommandsExecutor {
     }
 
     @Override
-    public void executeCommands() {
+    public void executeCommands() throws Exception {
         while (!commands.isEmpty()) {
             Command command = commands.poll();
             command.execute();
@@ -62,8 +62,8 @@ class DatabaseCommandExecutor implements CommandsExecutor {
                 RevertibleCommand revertibleCommand = (RevertibleCommand) command;
                 try {
                     revertibleCommand.revert();
-                } catch (SQLRevertException e) {
-                    logger.error("Unexpected database error while applying rollback: " + e.getMessage());
+                } catch (Exception e) {
+                    logger.error("Unexpected: ", e);
                 }
             }
         }

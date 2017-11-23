@@ -1,5 +1,7 @@
 package com.tmc.transaction.core.def;
 
+import com.tmc.exception.SQLConnectionException;
+
 import java.io.File;
 import java.nio.file.Path;
 
@@ -22,7 +24,7 @@ public interface Transaction extends And {
      * @param qualifier of database on which current query will be executed
      * @param query query that will be executed
      */
-    And addStatement(String qualifier, String query);
+    And addStatement(String qualifier, String query) throws SQLConnectionException;
 
     /**
      * Add queries that will be executed in current transaction

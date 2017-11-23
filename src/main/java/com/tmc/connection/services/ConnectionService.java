@@ -64,7 +64,7 @@ public class ConnectionService {
      * @see Connection
      * @see com.tmc.connection.annotation.DatabaseProperty
      */
-    public Connection getConnectionByQualifier(String qualifier) {
+    public Connection getConnectionByQualifier(String qualifier) throws SQLConnectionException {
         if (cachedConnections.containsKey(qualifier)) {
             Connection connection = cachedConnections.get(qualifier);
             return connection;
@@ -76,7 +76,7 @@ public class ConnectionService {
         }
 
 
-        Connection connection = null;
+        Connection connection;
         try {
             connection = dataSource.getConnection();
         } catch (SQLException e) {

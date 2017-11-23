@@ -10,5 +10,5 @@ public interface RevertibleCommand extends Command {
     /**
      * Reverts executed command
      */
-    void revert();
+    void revert() throws Exception;
 }

@@ -30,7 +30,7 @@ public interface CommandsExecutor {
     /**
      * Executes one-by-one command from the collection of the commands
      */
-    void executeCommands();
+    void executeCommands() throws Exception;
 
     /**
      * Revert one-by-one command from the collection of the executed commands

@@ -1,6 +1,6 @@
 package com.tmc.exception;
 
-public class SQLConnectionException extends RuntimeException {
+public class SQLConnectionException extends Exception {
 
     private final static String message = "Connection with database cannot be established";
 

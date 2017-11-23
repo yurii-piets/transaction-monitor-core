@@ -1,6 +1,6 @@
 package com.tmc.exception;
 
-public class SQLRevertException extends RuntimeException {
+public class SQLRevertException extends Exception {
 
     private final static String message = "Revert cannot be applied on database";
 
