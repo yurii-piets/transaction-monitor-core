@@ -127,6 +127,7 @@ class TransactionImpl implements Transaction {
      * Method that should be called on Bean/object destruction
      * close opened connection in current transaction
      */
+    @Override
     @PreDestroy
     public void finalize() {
         for (String qualifier: propertyService.getQualifiers()){

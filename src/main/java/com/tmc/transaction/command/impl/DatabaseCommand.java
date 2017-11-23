@@ -50,7 +50,7 @@ public class DatabaseCommand implements RevertibleCommand {
      */
     @Override
     public void execute() throws SQLException {
-        savepoint = connection.setSavepoint();
+        initSavepoint();
 
         Statement statement = connection.createStatement();
         statement.execute(sql);
@@ -65,5 +65,9 @@ public class DatabaseCommand implements RevertibleCommand {
     @Override
     public void revert() throws SQLException {
         connection.releaseSavepoint(savepoint);
+    }
+
+    private void initSavepoint() throws SQLException {
+        savepoint = connection.setSavepoint();
     }
 }
