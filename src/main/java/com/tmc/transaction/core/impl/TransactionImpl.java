@@ -116,7 +116,7 @@ class TransactionImpl implements Transaction {
         try {
             executor.executeCommands();
         } catch (Exception e) {
-            logger.error("Unexpected: ", e);
+            logger.error("Unexpected:" + e.getLocalizedMessage(), e.getCause());
         }
         commitForAll();
 
