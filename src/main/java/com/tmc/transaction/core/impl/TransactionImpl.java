@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -114,32 +113,18 @@ class TransactionImpl implements Transaction {
     @Override
     public And commit() {
         try {
+            logger.info("Performing transaction.");
             executor.executeCommands();
             commitForAll();
+            logger.info("Transaction successfully finished.");
         } catch (Exception e) {
-            logger.error("Unexpected:" + e.getLocalizedMessage(), e.getCause());
+            logger.error("Unexpected: " + e.getLocalizedMessage(), e.getCause());
+            executor.revertCommands();
+            logger.error("Applied revert on database.");
         }
 
+        finishTransaction();
         return this;
-    }
-
-    /**
-     * Method that should be called on Bean/object destruction
-     * close opened connection in current transaction
-     */
-    @PreDestroy
-    public void finalize() {
-        for (String qualifier : propertyService.getQualifiers()) {
-            try {
-                Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                connection.close();
-            } catch (SQLException e) {
-                logger.error("Unexpected error while closing connection", e);
-            } catch (SQLConnectionException e) {
-                logger.error("Unexpected: ", e);
-            }
-        }
-        connectionService.clearCache();
     }
 
     /**
@@ -179,6 +164,31 @@ class TransactionImpl implements Transaction {
         String filteredQuery = query
                 .replace("begin;", "")
                 .replace("commit;", "");
+
+        if(query.contains("begin;")) {
+            logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
+        }
+
+        if(query.contains("begin;")) {
+            logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
+        }
+
         return filteredQuery;
+    }
+
+    /**
+     * Method that should be called on Bean/object destruction
+     * close opened connection in current transaction
+     */
+    private void finishTransaction() {
+        for (String qualifier : propertyService.getQualifiers()) {
+            try {
+                Connection connection = connectionService.getConnectionByQualifier(qualifier);
+                connection.close();
+            } catch (SQLException | SQLConnectionException e) {
+                logger.error("Unexpected: ", e);
+            }
+        }
+        connectionService.clearCache();
     }
 }
