@@ -17,7 +17,6 @@ public class TMConfig {
      * @return new instance TransactionService
      * @see TransactionService
      */
-    // TODO: 21/11/2017 think about how to make SpringApplication.run called only one time
     public static TransactionService boot(String... args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(TMConfig.class, args);
         return new TransactionService(applicationContext);
