@@ -23,13 +23,13 @@ public final class ApplicationContext {
 
     private CommandsExecutor commandsExecutor;
 
-    private Map<String, DataSource> dataSources = new HashMap<>();
+    private final Map<String, DataSource> dataSources = new HashMap<>();
 
     private ApplicationContext(){
         databaseConfig();
     }
 
-    DatabaseConfig databaseConfig() {
+    private DatabaseConfig databaseConfig() {
         if (databaseConfig == null) {
             databaseConfig = new DatabaseConfig(this, propertyService());
         }

@@ -47,16 +47,15 @@ public class TransactionImpl implements Transaction {
 
     @Override
     public And begin(String... qualifiers) {
-        try {
+        if (qualifiers == null || qualifiers.length == 0) {
+            throw new IllegalArgumentException("Qualifiers of databases on which transaction will be performed should be listed.");
+        }
 
-            if (qualifiers == null || qualifiers.length == 0) {
-                //throw something
-            } else {
-                for (String qualifier : qualifiers) {
-                    Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                    turnOffAutoCommit(connection);
-                    activeQualifiers.add(qualifier);
-                }
+        try {
+            for (String qualifier : qualifiers) {
+                Connection connection = connectionService.getConnectionByQualifier(qualifier);
+                turnOffAutoCommit(connection);
+                activeQualifiers.add(qualifier);
             }
         } catch (SQLAutoCommitException | SQLConnectionException e) {
             logger.error("Unexpected: ", e);
@@ -155,11 +154,11 @@ public class TransactionImpl implements Transaction {
                 .replace("begin;", "")
                 .replace("commit;", "");
 
-        if(query.contains("begin;")) {
+        if (query.contains("begin;")) {
             logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
         }
 
-        if(query.contains("begin;")) {
+        if (query.contains("begin;")) {
             logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
         }
 
