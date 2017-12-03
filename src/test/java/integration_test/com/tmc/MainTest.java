@@ -37,8 +37,7 @@ public class MainTest {
 
     private final MainTestUtil testUtil = new MainTestUtil();
 
-    public MainTest() throws URISyntaxException {
-    }
+    public MainTest() throws URISyntaxException {}
 
     @Before
     public void initDB() throws IOException {

@@ -13,7 +13,6 @@ public class TMConfig {
      * @see TransactionService
      */
     public static TransactionService boot() {
-        ApplicationContext applicationContext = new ApplicationContext();
-        return applicationContext.getTransactionService();
+        return ApplicationContext.getTransactionService();
     }
 }

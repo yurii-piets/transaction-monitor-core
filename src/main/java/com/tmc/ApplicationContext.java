@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class ApplicationContext {
 
+    private static final ApplicationContext instance = new ApplicationContext();
+
     private DatabaseConfig databaseConfig;
 
     private ConnectionService connectionService;
@@ -23,11 +25,11 @@ public class ApplicationContext {
 
     private Map<String, DataSource> dataSources = new HashMap<>();
 
-    public ApplicationContext(){
+    private ApplicationContext(){
         databaseConfig();
     }
 
-    public DatabaseConfig databaseConfig() {
+    DatabaseConfig databaseConfig() {
         if (databaseConfig == null) {
             databaseConfig = new DatabaseConfig(this, propertyService());
         }
@@ -59,8 +61,8 @@ public class ApplicationContext {
         return commandsExecutor;
     }
 
-    public TransactionService getTransactionService() {
-        return new TransactionService(this);
+    static TransactionService getTransactionService() {
+        return new TransactionService(instance);
     }
 
     public DataSource getDataSourceByQualifier(String qualifier) {
