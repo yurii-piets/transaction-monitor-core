@@ -1,0 +1,8 @@
+insert into klienci values
+                    (16, 'Pariusz Dałka', 'Kraków', '666 666 666'),
+                    (23, 'Rollback Successful', 'PSQL', '010 001 100');
+
+update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';
+
+update zamowienia set opis='update successful';
+insert into zamowienia values (16, 15, 'insert successful');
