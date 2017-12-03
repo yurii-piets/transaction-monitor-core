@@ -97,7 +97,6 @@ public class MainTest {
         assertFalse(resultSet4.next());
     }
 
-    // TODO: 03/12/2017 test fails
     @Test
     public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
