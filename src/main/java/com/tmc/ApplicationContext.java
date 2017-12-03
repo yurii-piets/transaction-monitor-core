@@ -11,9 +11,9 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ApplicationContext {
+public final class ApplicationContext {
 
-    private static final ApplicationContext instance = new ApplicationContext();
+    private static final ApplicationContext context = new ApplicationContext();
 
     private DatabaseConfig databaseConfig;
 
@@ -39,7 +39,7 @@ public class ApplicationContext {
 
     public ConnectionService connectionService() {
         if (connectionService == null) {
-            connectionService = new ConnectionService(this);
+            connectionService = new ConnectionService(context);
         }
 
         return connectionService;
@@ -62,7 +62,7 @@ public class ApplicationContext {
     }
 
     static TransactionService getTransactionService() {
-        return new TransactionService(instance);
+        return new TransactionService(context);
     }
 
     public DataSource getDataSourceByQualifier(String qualifier) {
