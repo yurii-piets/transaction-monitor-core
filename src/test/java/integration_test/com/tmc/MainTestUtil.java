@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MainTestUtil {
+class MainTestUtil {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -40,7 +40,7 @@ public class MainTestUtil {
         dataSourceTmtwo.setDriverClassName("org.postgresql.Driver");
     }
 
-    public ResultSet getTmnOneQueryResult(String sql){
+    ResultSet getTmOneQueryResult(String sql){
         try {
             return dataSourceTmone.getConnection().createStatement().executeQuery(sql);
         } catch (SQLException e) {
@@ -49,7 +49,7 @@ public class MainTestUtil {
         return null;
     }
 
-    public ResultSet getTmTwoQueryResult(String sql){
+    ResultSet getTmTwoQueryResult(String sql){
         try {
             return dataSourceTmtwo.getConnection().createStatement().executeQuery(sql);
         } catch (SQLException e) {

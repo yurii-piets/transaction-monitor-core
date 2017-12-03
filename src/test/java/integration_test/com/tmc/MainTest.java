@@ -35,9 +35,10 @@ public class MainTest {
 
     private final TransactionService transactionService = TMConfig.boot();
 
-    private final  MainTestUtil testUtil = new MainTestUtil();
+    private final MainTestUtil testUtil = new MainTestUtil();
 
-    public MainTest() throws URISyntaxException {}
+    public MainTest() throws URISyntaxException {
+    }
 
     @Before
     public void initDB() throws IOException {
@@ -77,18 +78,18 @@ public class MainTest {
 
         transaction.commit();
 
-        ResultSet resultSet = testUtil.getTmnOneQueryResult("SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
+        ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
         assertTrue(resultSet.next());
 
         ResultSet resultSet1 = testUtil.getTmTwoQueryResult("SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='insert successful' AND ocena='4.5';");
         assertTrue(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmnOneQueryResult("SELECT * FROM klienci;");
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("SELECT * FROM klienci;");
         assertFalse(resultSet2.next());
 
         ResultSet resultSet3 = testUtil.getTmTwoQueryResult("SELECT * FROM oceny WHERE przedmiot like 'Fizyka%';");
 
-        while (resultSet3.next()){
+        while (resultSet3.next()) {
             assertEquals(6.0, resultSet3.getDouble("ocena"), 0.1);
         }
 
@@ -97,8 +98,9 @@ public class MainTest {
     }
 
     @Test
-    public void runFromFiles() throws IOException {
+    public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
             .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
@@ -108,23 +110,7 @@ public class MainTest {
                 .commit();
 
         assertSuccessfulQueriesOnTmOne();
-        assertSuccessfulQueriesInTmTwo();
-    }
-
-    @Test
-    public void runSuccessfulQueriesFromFiles() throws IOException {
-        transactionService.newTransaction()
-            .and()
-                .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
-                .addStatement(TMONE_QUALIFIER, pathCommit1)
-            .and()
-                .addStatement(TMTWO_QUALIFIER, pathCommit2)
-            .and()
-                .commit();
-
-        assertSuccessfulQueriesOnTmOne();
-        assertSuccessfulQueriesInTmTwo();
+        assertSuccessfulQueriesOnTmTwo();
     }
 
     @Test
@@ -175,52 +161,87 @@ public class MainTest {
         assertFailedQueriesOnTmTwo();
     }
 
-    private void assertSuccessfulQueriesOnTmOne(){
-        // TODO: 03/12/2017 write selects for asserts
+    private void assertSuccessfulQueriesOnTmOne() throws SQLException {
+        ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dałka' AND miejscowosc='Kraków' AND telefon='666 666 666';");
+        assertTrue(resultSet.next());
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=23 AND nazwa='Rollback Successful' AND miejscowosc='PSQL' AND telefon='010 001 100';");
+        assertTrue(resultSet1.next());
+
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz';");
+        resultSet2.next();
+        assertEquals(3, resultSet2.getInt("total"));
+
+        ResultSet resultSet3 = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE miejscowosc='Warszawa';");
+        while (resultSet3.next()) {
+            assertEquals("Lech Balcerowicz", resultSet3.getString("nazwa"));
+        }
+
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia;");
+        while (resultSet4.next()) {
+            assertEquals("update successful", resultSet4.getString("opis"));
+        }
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
+        assertTrue(resultSet5.next());
     }
 
-    private void assertSuccessfulQueriesInTmTwo(){
-        // TODO: 03/12/2017 write selects for asserts
+    private void assertSuccessfulQueriesOnTmTwo() throws SQLException {
+        ResultSet resultSet = testUtil.getTmTwoQueryResult("SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='Programownie Obiektowe' AND ocena=4.5;");
+        assertTrue(resultSet.next());
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("SELECT * FROM oceny WHERE przedmiot LIKE 'Fizyka%';");
+        while (resultSet1.next()) {
+            assertEquals(2.0, resultSet1.getDouble("ocena"), 0.1);
+        }
+
+        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("SELECT * FROM studenci WHERE wydzial='imir';");
+        assertFalse(resultSet2.next());
+
+        ResultSet resultSet3 = testUtil.getTmTwoQueryResult("SELECT * FROM studenci WHERE wydzial='ieit';");
+        while (resultSet.next()) {
+            assertEquals("update successful", resultSet3.getString("nazwa"));
+        }
     }
 
     private void assertFailedQueriesOnTmOne() throws SQLException {
-        ResultSet resultSet = testUtil.getTmnOneQueryResult("SELECT * FROM klienci WHERE nazwa='Rollback Failed'");
+        ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE nazwa='Rollback Failed'");
         assertFalse(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmnOneQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("SELECT * FROM klienci " +
                 " WHERE idklienta=20" +
                 " OR nazwa='Successful Rollback Commit'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='404 404 404';");
         assertFalse(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmnOneQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("SELECT * FROM klienci " +
                 " WHERE idklienta=21" +
                 " OR nazwa='Another Successful Commit'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='403 403 403';");
         assertFalse(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmnOneQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet3 = testUtil.getTmOneQueryResult("SELECT * FROM klienci " +
                 " WHERE idklienta=22" +
                 " OR nazwa='Yet Another Working Insert'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='402 402 402';");
         assertFalse(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmnOneQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=16" +
                 " OR idklienta=20" +
                 " OR opis='Stop inserting!';");
         assertFalse(resultSet4.next());
 
-        ResultSet resultSet5 = testUtil.getTmnOneQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=17" +
                 " OR idklienta=21" +
                 " OR opis='9/11 was an inside job';");
         assertFalse(resultSet5.next());
 
-        ResultSet resultSet6 = testUtil.getTmnOneQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet6 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=18" +
                 " OR idklienta=22" +
                 " OR opis='¯\\_(ツ)_/¯';");
@@ -255,5 +276,4 @@ public class MainTest {
                 " OR wydzial='EXCEPTION THROWN';");
         assertFalse(resultSet12.next());
     }
-
 }
