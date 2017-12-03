@@ -1,22 +1,16 @@
 package com.tmc.transaction.executor.impl;
 
-import com.tmc.exception.SQLRevertException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
 import com.tmc.transaction.executor.def.CommandsExecutor;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-class DatabaseCommandExecutor implements CommandsExecutor {
+public class DatabaseCommandExecutor implements CommandsExecutor {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 

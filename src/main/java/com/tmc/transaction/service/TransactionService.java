@@ -1,7 +1,8 @@
 package com.tmc.transaction.service;
 
+import com.tmc.ApplicationContext;
 import com.tmc.transaction.core.def.Transaction;
-import org.springframework.context.ConfigurableApplicationContext;
+import com.tmc.transaction.core.impl.TransactionImpl;
 
 /**
  * Serviced that is a proxy class between a Spring context of TM library and
@@ -9,9 +10,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class TransactionService {
 
-    private final ConfigurableApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-    public TransactionService(ConfigurableApplicationContext applicationContext) {
+    public TransactionService(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -20,6 +21,10 @@ public class TransactionService {
      * @see Transaction
      */
     public Transaction newTransaction() {
-        return applicationContext.getBean(Transaction.class);
+        return new TransactionImpl(
+                applicationContext.connectionService(),
+                applicationContext.propertyService(),
+                applicationContext.commandsExecutor()
+        );
     }
 }

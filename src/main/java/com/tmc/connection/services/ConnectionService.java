@@ -1,17 +1,13 @@
 package com.tmc.connection.services;
 
+import com.tmc.ApplicationContext;
 import com.tmc.exception.SQLConnectionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Manages the Connection to Databases
@@ -19,40 +15,14 @@ import java.util.Set;
  * @see Connection
  * @see DataSource
  */
-@Service
 public class ConnectionService {
 
-    private final ConfigurableApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     private final Map<String, Connection> cachedConnections = new HashMap<>();
 
-    @Autowired
-    public ConnectionService(ConfigurableApplicationContext applicationContext) {
+    public ConnectionService(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-    }
-
-    /**
-     * @return Set of Connection to all databases specified by qualifier in @DatabaseProperty
-     * <p>
-     * if connection was already requested takes it from a cache
-     * if not creates new instances of connection and out it into cache
-     * @see com.tmc.connection.annotation.DatabaseProperty
-     * @see Connection
-     */
-    public Set<Connection> getAllConnections() {
-        Map<String, DataSource> dataSourcesBeans = applicationContext.getBeansOfType(DataSource.class);
-        Set<Connection> connectionsSet = new HashSet<>();
-
-        for (String key : dataSourcesBeans.keySet()) {
-            if (cachedConnections.containsKey(key)) {
-                connectionsSet.add(cachedConnections.get(key));
-            } else {
-                cachedConnections.put(key, cachedConnections.get(key));
-                connectionsSet.add(cachedConnections.get(key));
-            }
-        }
-
-        return connectionsSet;
     }
 
     /**
@@ -70,7 +40,7 @@ public class ConnectionService {
             return connection;
         }
 
-        DataSource dataSource = applicationContext.getBean(qualifier, DataSource.class);
+        DataSource dataSource = applicationContext.getDataSourceByQualifier(qualifier);
         if (dataSource == null) {
             throw new IllegalArgumentException("Database qualifier: [" + qualifier + "] does not exist");
         }
