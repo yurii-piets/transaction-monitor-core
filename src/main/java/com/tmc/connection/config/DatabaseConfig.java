@@ -68,7 +68,6 @@ public class DatabaseConfig {
         return basicDataSource;
     }
 
-
     /**
      * Returns value of a property from configured properties files
      *

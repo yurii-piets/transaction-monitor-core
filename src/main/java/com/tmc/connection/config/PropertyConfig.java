@@ -2,8 +2,10 @@ package com.tmc.connection.config;
 
 import com.tmc.connection.annotation.DatabaseProperty;
 import org.reflections.Reflections;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -17,10 +19,16 @@ public class PropertyConfig {
     @Bean
     public PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-        Resource[] resources = getResources().toArray(new Resource[]{});
+        Resource[] resources = findResourcesByDatabasePropertyAnnotation().toArray(new Resource[]{});
         pspc.setLocations(resources);
         pspc.setIgnoreUnresolvablePlaceholders(true);
         return pspc;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public Reflections reflections(){
+        return new Reflections();
     }
 
     /**
@@ -29,7 +37,7 @@ public class PropertyConfig {
      *
      * @see DatabaseProperty
      */
-    private Set<Resource> getResources() {
+    private Set<Resource> findResourcesByDatabasePropertyAnnotation() {
         Reflections reflections = new Reflections();
         Set<Class<?>> configs = reflections.getTypesAnnotatedWith(DatabaseProperty.class);
 
