@@ -4,10 +4,6 @@ import com.tmc.ApplicationContext;
 import com.tmc.transaction.core.def.Transaction;
 import com.tmc.transaction.core.impl.TransactionImpl;
 
-/**
- * Serviced that is a proxy class between a Spring context of TM library and
- * user's no context application
- */
 public class TransactionService {
 
     private final ApplicationContext applicationContext;

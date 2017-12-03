@@ -15,7 +15,7 @@ class MainTestUtil {
 
     private BasicDataSource dataSourceTmtwo;
 
-    public MainTestUtil() {
+    MainTestUtil() {
         initDataSources();
     }
 
