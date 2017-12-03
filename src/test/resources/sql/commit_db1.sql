@@ -1,5 +1,5 @@
 insert into klienci values
-                    (16, 'Pariusz Dałka', 'Kraków', '666 666 666'),
+                    (16, 'Pariusz Dalka', 'Krakow', '666 666 666'),
                     (23, 'Rollback Successful', 'PSQL', '010 001 100');
 
 update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';

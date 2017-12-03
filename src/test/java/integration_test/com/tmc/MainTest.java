@@ -33,7 +33,7 @@ public class MainTest {
     private final Path pathRollback1 = Paths.get(getClass().getClassLoader().getResource("sql/rollback_db1.sql").toURI());
     private final Path pathRollback2 = Paths.get(getClass().getClassLoader().getResource("sql/rollback_db2.sql").toURI());
 
-    private final TransactionService transactionService = TMConfig.boot();
+    private static final TransactionService transactionService = TMConfig.boot();
 
     private final MainTestUtil testUtil = new MainTestUtil();
 
@@ -97,6 +97,7 @@ public class MainTest {
         assertFalse(resultSet4.next());
     }
 
+    // TODO: 03/12/2017 test fails
     @Test
     public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
@@ -162,7 +163,7 @@ public class MainTest {
     }
 
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {
-        ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dałka' AND miejscowosc='Kraków' AND telefon='666 666 666';");
+        ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dalka' AND miejscowosc='Krakow' AND telefon='666 666 666';");
         assertTrue(resultSet.next());
 
         ResultSet resultSet1 = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=23 AND nazwa='Rollback Successful' AND miejscowosc='PSQL' AND telefon='010 001 100';");
@@ -177,7 +178,7 @@ public class MainTest {
             assertEquals("Lech Balcerowicz", resultSet3.getString("nazwa"));
         }
 
-        ResultSet resultSet4 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia;");
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("SELECT * FROM zamowienia WHERE idzamowienia!=16;");
         while (resultSet4.next()) {
             assertEquals("update successful", resultSet4.getString("opis"));
         }
@@ -190,7 +191,7 @@ public class MainTest {
         ResultSet resultSet = testUtil.getTmTwoQueryResult("SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='Programownie Obiektowe' AND ocena=4.5;");
         assertTrue(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmOneQueryResult("SELECT * FROM oceny WHERE przedmiot LIKE 'Fizyka%';");
+        ResultSet resultSet1 = testUtil.getTmTwoQueryResult("SELECT * FROM oceny WHERE przedmiot LIKE 'Fizyka%';");
         while (resultSet1.next()) {
             assertEquals(2.0, resultSet1.getDouble("ocena"), 0.1);
         }
