@@ -9,12 +9,8 @@ import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
 import com.tmc.transaction.core.def.Transaction;
 import com.tmc.transaction.executor.def.CommandsExecutor;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-class TransactionImpl implements Transaction {
+public class TransactionImpl implements Transaction {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -43,7 +37,6 @@ class TransactionImpl implements Transaction {
      */
     private final Set<String> activeQualifiers = new HashSet<>();
 
-    @Autowired
     public TransactionImpl(ConnectionService connectionService,
                            PropertyService propertyService,
                            CommandsExecutor executor) {
@@ -54,19 +47,15 @@ class TransactionImpl implements Transaction {
 
     @Override
     public And begin(String... qualifiers) {
-        try {
+        if (qualifiers == null || qualifiers.length == 0) {
+            throw new IllegalArgumentException("Qualifiers of databases on which transaction will be performed should be listed.");
+        }
 
-            if (qualifiers == null || qualifiers.length == 0) {
-                for (Connection connection : connectionService.getAllConnections()) {
-                    turnOffAutoCommit(connection);
-                    activeQualifiers.addAll(propertyService.getQualifiers());
-                }
-            } else {
-                for (String qualifier : qualifiers) {
-                    Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                    turnOffAutoCommit(connection);
-                    activeQualifiers.add(qualifier);
-                }
+        try {
+            for (String qualifier : qualifiers) {
+                Connection connection = connectionService.getConnectionByQualifier(qualifier);
+                turnOffAutoCommit(connection);
+                activeQualifiers.add(qualifier);
             }
         } catch (SQLAutoCommitException | SQLConnectionException e) {
             logger.error("Unexpected: ", e);
@@ -165,11 +154,11 @@ class TransactionImpl implements Transaction {
                 .replace("begin;", "")
                 .replace("commit;", "");
 
-        if(query.contains("begin;")) {
+        if (query.contains("begin;")) {
             logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
         }
 
-        if(query.contains("begin;")) {
+        if (query.contains("begin;")) {
             logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
         }
 
