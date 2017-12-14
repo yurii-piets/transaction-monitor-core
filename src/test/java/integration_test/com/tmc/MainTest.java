@@ -172,8 +172,6 @@ public class MainTest {
 
         transaction2.commit();
         transaction1.commit();
-
-        // TODO: 13/12/2017 Exception is thrown - fix the bug
     }
 
     @Test
