@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-class MainTestUtil {
+class TMTestUtil {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -15,7 +15,7 @@ class MainTestUtil {
 
     private BasicDataSource dataSourceTmtwo;
 
-    MainTestUtil() {
+    TMTestUtil() {
         initDataSources();
     }
 

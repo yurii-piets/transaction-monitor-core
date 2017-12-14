@@ -63,9 +63,9 @@ public class PropertyService {
                 .map(c -> c.getAnnotation(DatabaseProperty.class))
                 .map(DatabaseProperty::path)
                 .map(path -> {
-                    Properties properties = null;
+                    Properties properties = new Properties();
+
                     try {
-                        properties = new Properties();
                         properties.load(getClass().getClassLoader().getResourceAsStream(path));
                     } catch (IOException e) {
                         logger.error("Unexpected: ", e);

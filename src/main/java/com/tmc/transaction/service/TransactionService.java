@@ -2,7 +2,6 @@ package com.tmc.transaction.service;
 
 import com.tmc.ApplicationContext;
 import com.tmc.transaction.core.def.Transaction;
-import com.tmc.transaction.core.impl.TransactionImpl;
 
 public class TransactionService {
 
@@ -17,10 +16,6 @@ public class TransactionService {
      * @see Transaction
      */
     public Transaction newTransaction() {
-        return new TransactionImpl(
-                applicationContext.connectionService(),
-                applicationContext.propertyService(),
-                applicationContext.commandsExecutor()
-        );
+        return applicationContext.transaction();
     }
 }

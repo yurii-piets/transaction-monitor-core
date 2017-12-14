@@ -16,6 +16,7 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 @DatabaseProperty(path = MainTest.PROPERTY_SOURCE_FILE_NAME, qualifiers = {MainTest.TMONE_QUALIFIER, MainTest.TMTWO_QUALIFIER})
@@ -35,20 +36,21 @@ public class MainTest {
 
     private static final TransactionService transactionService = TMConfig.boot();
 
-    private final MainTestUtil testUtil = new MainTestUtil();
+    private final TMTestUtil testUtil = new TMTestUtil();
 
-    public MainTest() throws URISyntaxException {}
+    public MainTest() throws URISyntaxException {
+    }
 
     @Before
     public void initDB() throws IOException {
         transactionService.newTransaction()
-            .and()
+                .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
+                .and()
                 .addStatement(TMONE_QUALIFIER, pathInit1)
-            .and()
+                .and()
                 .addStatement(TMTWO_QUALIFIER, pathInit2)
-            .and()
+                .and()
                 .commit();
     }
 
@@ -99,13 +101,13 @@ public class MainTest {
     @Test
     public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-            .and()
+                .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
+                .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
-            .and()
+                .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2.toFile())
-            .and()
+                .and()
                 .commit();
 
         assertSuccessfulQueriesOnTmOne();
@@ -115,13 +117,13 @@ public class MainTest {
     @Test
     public void runFirstFailedSecondSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-            .and()
+                .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
+                .and()
                 .addStatement(TMONE_QUALIFIER, pathRollback1)
-            .and()
+                .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2)
-            .and()
+                .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -131,13 +133,13 @@ public class MainTest {
     @Test
     public void runFirstSuccessSecondFailedQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-            .and()
+                .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
+                .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
-            .and()
+                .and()
                 .addStatement(TMTWO_QUALIFIER, pathRollback2)
-            .and()
+                .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -147,17 +149,138 @@ public class MainTest {
     @Test
     public void runFailedQueriesFromFile() throws IOException, SQLException {
         transactionService.newTransaction()
-            .and()
+                .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
+                .and()
                 .addStatement(TMONE_QUALIFIER, pathRollback1)
-            .and()
+                .and()
                 .addStatement(TMTWO_QUALIFIER, pathRollback2)
-            .and()
+                .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
         assertFailedQueriesOnTmTwo();
+    }
+
+    @Test
+    public void runEmptyTransactions() {
+        Transaction transaction1 = transactionService.newTransaction();
+        Transaction transaction2 = transactionService.newTransaction();
+
+        transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+        transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+
+        transaction2.commit();
+        transaction1.commit();
+    }
+
+    @Test
+    public void runEmptyQuery() {
+        transactionService.newTransaction()
+                .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                .addStatement(TMONE_QUALIFIER, "")
+                .and()
+                .commit();
+    }
+
+    @Test
+    public void runFirstFailedAndSecondSuccessfulMixedTransactions() throws SQLException {
+        Transaction transaction1 = transactionService.newTransaction();
+        Transaction transaction2 = transactionService.newTransaction();
+
+        transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+        transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+
+        transaction1
+                .addStatement(TMONE_QUALIFIER,
+                        "insert into klienci values(77, 'Test Failed', 'Test Failed', '000 000 000');")
+                .and()
+                .addStatement(TMTWO_QUALIFIER, "delete from studenci where idstudenta = 7");
+
+        transaction2
+                .addStatement(TMTWO_QUALIFIER,
+                        "delete from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;")
+                .and()
+                .addStatement(TMONE_QUALIFIER, "insert into zamowienia values(16, 1, 'Test Successful');");
+
+        transaction1
+                .addStatement(TMONE_QUALIFIER, "insert into klienci values('Exception thrown', 'Test Failed', 'Test Failed', '000 000 000');");
+
+        transaction2.commit();
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select * from klienci where idklienta=77");
+        assertFalse(resultSet1.next());
+
+        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select * from studenci where idstudenta=7");
+        assertTrue(resultSet2.next());
+
+        ResultSet resultSet3 = testUtil.getTmTwoQueryResult("select * from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;");
+        assertFalse(resultSet3.next());
+
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("select from zamowienia where idzamowienia=16;");
+        assertTrue(resultSet4.next());
+
+        transaction1.commit();
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select * from klienci where idklienta=77");
+        assertFalse(resultSet5.next());
+
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select * from studenci where idstudenta=7");
+        assertTrue(resultSet6.next());
+    }
+
+    @Test
+    public void runFirstSuccessfulAndSecondSuccessfulMixed() throws SQLException {
+        Transaction transaction1 = transactionService.newTransaction();
+        Transaction transaction2 = transactionService.newTransaction();
+
+        transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+        transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+
+        transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';");
+        transaction1.addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';");
+
+        transaction2.addStatement(TMONE_QUALIFIER, "insert into zamowienia values (16, 15, 'insert successful');");
+        transaction2.addStatement(TMTWO_QUALIFIER, "update oceny set ocena=1.0 where przedmiot like 'Fizyka%';");
+
+        transaction1.commit();
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        resultSet1.next();
+        assertEquals(14, resultSet1.getInt("total"));
+
+        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select nazwa from studenci where wydzial='ieit';");
+        while (resultSet2.next()){
+            assertEquals("update successful", resultSet2.getString("nazwa"));
+        }
+
+        ResultSet resultSet3 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=16;");
+        assertFalse(resultSet3.next());
+
+        ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select ocena from oceny where przedmiot like 'Fizyka%'");
+        while(resultSet4.next()){
+            assertNotEquals(1.0, resultSet4.getDouble("ocena"), 0.1);
+        }
+
+        transaction2.commit();
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        resultSet5.next();
+        assertEquals(14, resultSet5.getInt("total"));
+
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select nazwa from studenci where wydzial='ieit';");
+        while (resultSet6.next()){
+            assertEquals("update successful", resultSet6.getString("nazwa"));
+        }
+
+        ResultSet resultSet7 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=16;");
+        assertTrue(resultSet7.next());
+
+        ResultSet resultSet8 = testUtil.getTmTwoQueryResult("select ocena from oceny where przedmiot like 'Fizyka%'");
+        while(resultSet8.next()){
+            assertEquals(1.0, resultSet8.getInt("ocena"), 0.1);
+        }
     }
 
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {

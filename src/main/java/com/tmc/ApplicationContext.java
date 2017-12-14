@@ -3,6 +3,8 @@ package com.tmc;
 import com.tmc.connection.config.DatabaseConfig;
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
+import com.tmc.transaction.core.def.Transaction;
+import com.tmc.transaction.core.impl.TransactionImpl;
 import com.tmc.transaction.executor.def.CommandsExecutor;
 import com.tmc.transaction.executor.impl.DatabaseCommandExecutor;
 import com.tmc.transaction.service.TransactionService;
@@ -17,15 +19,11 @@ public final class ApplicationContext {
 
     private DatabaseConfig databaseConfig;
 
-    private ConnectionService connectionService;
-
     private PropertyService propertyService;
-
-    private CommandsExecutor commandsExecutor;
 
     private final Map<String, DataSource> dataSources = new HashMap<>();
 
-    private ApplicationContext(){
+    private ApplicationContext() {
         databaseConfig();
     }
 
@@ -37,14 +35,6 @@ public final class ApplicationContext {
         return databaseConfig;
     }
 
-    public ConnectionService connectionService() {
-        if (connectionService == null) {
-            connectionService = new ConnectionService(context);
-        }
-
-        return connectionService;
-    }
-
     public PropertyService propertyService() {
         if (propertyService == null) {
             propertyService = new PropertyService();
@@ -53,16 +43,20 @@ public final class ApplicationContext {
         return propertyService;
     }
 
-    public CommandsExecutor commandsExecutor() {
-        if (commandsExecutor == null) {
-            return new DatabaseCommandExecutor();
-        }
-
-        return commandsExecutor;
+    public ConnectionService connectionService() {
+        return new ConnectionService(context);
     }
 
-    static TransactionService getTransactionService() {
+    public CommandsExecutor commandsExecutor() {
+        return new DatabaseCommandExecutor();
+    }
+
+    static TransactionService transactionService() {
         return new TransactionService(context);
+    }
+
+    public Transaction transaction(){
+        return new TransactionImpl(connectionService(), commandsExecutor());
     }
 
     public DataSource getDataSourceByQualifier(String qualifier) {

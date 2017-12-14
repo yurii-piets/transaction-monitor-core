@@ -15,7 +15,7 @@ public class DatabaseConfig {
     private final static String USERNAME_PATTERN = "{qualifier}.username";
     private final static String PASSWORD_PATTERN = "{qualifier}.password";
     private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
-    private static final String QUALIFIER_PATTERN = "{qualifier}";
+    private final static String QUALIFIER_PATTERN = "{qualifier}";
 
     private final ApplicationContext applicationContext;
 
@@ -26,15 +26,15 @@ public class DatabaseConfig {
         this.applicationContext = applicationContext;
         this.propertyService = propertyService;
 
-        configure();
+        configureDataSources();
     }
 
     /**
-     * Declares a DataSource Bean for each qualifier of a database
+     * Declares a DataSource objects for each qualifier of a database
      *
      * @see DataSource
      */
-    private void configure() {
+    private void configureDataSources() {
         for (String qualifier : propertyService.getQualifiers()) {
             DataSource dataSource = dataSource(qualifier);
             applicationContext.addDataSource(qualifier, dataSource);
