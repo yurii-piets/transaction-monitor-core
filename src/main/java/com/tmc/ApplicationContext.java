@@ -17,15 +17,11 @@ public final class ApplicationContext {
 
     private DatabaseConfig databaseConfig;
 
-    private ConnectionService connectionService;
-
     private PropertyService propertyService;
-
-    private CommandsExecutor commandsExecutor;
 
     private final Map<String, DataSource> dataSources = new HashMap<>();
 
-    private ApplicationContext(){
+    private ApplicationContext() {
         databaseConfig();
     }
 
@@ -38,11 +34,7 @@ public final class ApplicationContext {
     }
 
     public ConnectionService connectionService() {
-        if (connectionService == null) {
-            connectionService = new ConnectionService(context);
-        }
-
-        return connectionService;
+        return new ConnectionService(context);
     }
 
     public PropertyService propertyService() {
@@ -54,11 +46,7 @@ public final class ApplicationContext {
     }
 
     public CommandsExecutor commandsExecutor() {
-        if (commandsExecutor == null) {
-            return new DatabaseCommandExecutor();
-        }
-
-        return commandsExecutor;
+        return new DatabaseCommandExecutor();
     }
 
     static TransactionService getTransactionService() {
