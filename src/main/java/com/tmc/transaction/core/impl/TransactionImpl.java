@@ -166,11 +166,11 @@ public class TransactionImpl implements Transaction {
     }
 
     /**
-     * Method that should be called on Bean/object destruction
+     * Method that is called when transaction is committed
      * close opened connection in current transaction
      */
     private void finishTransaction() {
-        for (String qualifier : propertyService.getQualifiers()) {
+        for (String qualifier : activeQualifiers) {
             try {
                 Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.close();

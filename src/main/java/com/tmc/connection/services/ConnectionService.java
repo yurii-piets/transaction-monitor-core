@@ -45,7 +45,6 @@ public class ConnectionService {
             throw new IllegalArgumentException("Database qualifier: [" + qualifier + "] does not exist");
         }
 
-
         Connection connection;
         try {
             connection = dataSource.getConnection();

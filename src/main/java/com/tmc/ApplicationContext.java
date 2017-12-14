@@ -3,6 +3,8 @@ package com.tmc;
 import com.tmc.connection.config.DatabaseConfig;
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
+import com.tmc.transaction.core.def.Transaction;
+import com.tmc.transaction.core.impl.TransactionImpl;
 import com.tmc.transaction.executor.def.CommandsExecutor;
 import com.tmc.transaction.executor.impl.DatabaseCommandExecutor;
 import com.tmc.transaction.service.TransactionService;
@@ -33,10 +35,6 @@ public final class ApplicationContext {
         return databaseConfig;
     }
 
-    public ConnectionService connectionService() {
-        return new ConnectionService(context);
-    }
-
     public PropertyService propertyService() {
         if (propertyService == null) {
             propertyService = new PropertyService();
@@ -45,11 +43,19 @@ public final class ApplicationContext {
         return propertyService;
     }
 
+    public ConnectionService connectionService() {
+        return new ConnectionService(context);
+    }
+
     public CommandsExecutor commandsExecutor() {
         return new DatabaseCommandExecutor();
     }
 
-    static TransactionService getTransactionService() {
+    public Transaction transaction(){
+        return new TransactionImpl(connectionService(), propertyService(), commandsExecutor());
+    }
+
+    static TransactionService transactionService() {
         return new TransactionService(context);
     }
 

@@ -28,6 +28,7 @@ public class DatabaseCommand implements RevertibleCommand {
 
     /**
      * Connection with the database on which command is executed
+     *
      * @see Connection
      */
     private final Connection connection;
@@ -54,7 +55,8 @@ public class DatabaseCommand implements RevertibleCommand {
     @Override
     public void execute() throws SQLQueryException, SQLSavepointCreationException, SQLStatementException {
         try {
-        initSavepoint();} catch (SQLException e) {
+            initSavepoint();
+        } catch (SQLException e) {
             throw new SQLSavepointCreationException(e);
         }
 
