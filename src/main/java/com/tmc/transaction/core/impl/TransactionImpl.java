@@ -153,7 +153,7 @@ public class TransactionImpl implements Transaction {
             logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
         }
 
-        if (query.contains("begin;")) {
+        if (query.contains("commit;")) {
             logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
         }
 
