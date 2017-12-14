@@ -1,7 +1,6 @@
 package com.tmc.transaction.core.impl;
 
 import com.tmc.connection.services.ConnectionService;
-import com.tmc.connection.services.PropertyService;
 import com.tmc.exception.SQLAutoCommitException;
 import com.tmc.exception.SQLConnectionException;
 import com.tmc.transaction.command.def.Command;
@@ -28,8 +27,6 @@ public class TransactionImpl implements Transaction {
 
     private final ConnectionService connectionService;
 
-    private final PropertyService propertyService;
-
     private final CommandsExecutor executor;
 
     /**
@@ -38,10 +35,8 @@ public class TransactionImpl implements Transaction {
     private final Set<String> activeQualifiers = new HashSet<>();
 
     public TransactionImpl(ConnectionService connectionService,
-                           PropertyService propertyService,
                            CommandsExecutor executor) {
         this.connectionService = connectionService;
-        this.propertyService = propertyService;
         this.executor = executor;
     }
 

@@ -51,12 +51,12 @@ public final class ApplicationContext {
         return new DatabaseCommandExecutor();
     }
 
-    public Transaction transaction(){
-        return new TransactionImpl(connectionService(), propertyService(), commandsExecutor());
-    }
-
     static TransactionService transactionService() {
         return new TransactionService(context);
+    }
+
+    public Transaction transaction(){
+        return new TransactionImpl(connectionService(), commandsExecutor());
     }
 
     public DataSource getDataSourceByQualifier(String qualifier) {
