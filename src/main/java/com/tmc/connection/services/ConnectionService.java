@@ -1,6 +1,6 @@
 package com.tmc.connection.services;
 
-import com.tmc.ApplicationContext;
+import com.tmc.connection.pool.def.ConnectionPool;
 import com.tmc.exception.SQLConnectionException;
 
 import javax.sql.DataSource;
@@ -17,12 +17,12 @@ import java.util.Map;
  */
 public class ConnectionService {
 
-    private final ApplicationContext applicationContext;
+    private final ConnectionPool connectionPool;
 
     private final Map<String, Connection> cachedConnections = new HashMap<>();
 
-    public ConnectionService(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public ConnectionService(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     /**
@@ -40,14 +40,9 @@ public class ConnectionService {
             return connection;
         }
 
-        DataSource dataSource = applicationContext.getDataSourceByQualifier(qualifier);
-        if (dataSource == null) {
-            throw new IllegalArgumentException("Database qualifier: [" + qualifier + "] does not exist");
-        }
-
         Connection connection;
         try {
-            connection = dataSource.getConnection();
+            connection = connectionPool.acquire(qualifier);
         } catch (SQLException e) {
             throw new SQLConnectionException(e);
         }
@@ -60,6 +55,8 @@ public class ConnectionService {
      * Empties cache of Connection
      */
     public void clearCache() {
-        cachedConnections.clear();
+        for (Connection connection : cachedConnections.values()) {
+            connectionPool.release(connection);
+        }
     }
 }

@@ -1,10 +1,10 @@
 package com.tmc.connection.config;
 
-import com.tmc.ApplicationContext;
 import com.tmc.connection.services.PropertyService;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Configuration of database
@@ -17,13 +17,13 @@ public class DatabaseConfig {
     private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
     private final static String QUALIFIER_PATTERN = "{qualifier}";
 
-    private final ApplicationContext applicationContext;
+    private final Map<String, DataSource> dataSources;
 
     private final PropertyService propertyService;
 
-    public DatabaseConfig(ApplicationContext applicationContext,
+    public DatabaseConfig(Map<String, DataSource> dataSources,
                           PropertyService propertyService) {
-        this.applicationContext = applicationContext;
+        this.dataSources = dataSources;
         this.propertyService = propertyService;
 
         configureDataSources();
@@ -37,7 +37,7 @@ public class DatabaseConfig {
     private void configureDataSources() {
         for (String qualifier : propertyService.getQualifiers()) {
             DataSource dataSource = dataSource(qualifier);
-            applicationContext.addDataSource(qualifier, dataSource);
+            dataSources.put(qualifier, dataSource);
         }
     }
 
