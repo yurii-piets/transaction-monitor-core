@@ -165,14 +165,6 @@ public class TransactionImpl implements Transaction {
      * close opened connection in current transaction
      */
     private void finishTransaction() {
-        for (String qualifier : activeQualifiers) {
-            try {
-                Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                connection.close();
-            } catch (SQLException | SQLConnectionException e) {
-                logger.error("Unexpected: ", e);
-            }
-        }
-        connectionService.clearCache();
+        connectionService.releaseConnections();
     }
 }

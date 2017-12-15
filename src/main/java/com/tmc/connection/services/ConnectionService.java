@@ -51,12 +51,11 @@ public class ConnectionService {
         return connection;
     }
 
-    /**
-     * Empties cache of Connection
-     */
-    public void clearCache() {
+    public void releaseConnections(){
         for (Connection connection : cachedConnections.values()) {
             connectionPool.release(connection);
         }
+
+        cachedConnections.clear();
     }
 }
