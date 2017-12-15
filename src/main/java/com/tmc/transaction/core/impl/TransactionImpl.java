@@ -95,7 +95,7 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And commit() {
+    public void commit() {
         try {
             logger.info("Performing transaction.");
             executor.executeCommands();
@@ -104,11 +104,11 @@ public class TransactionImpl implements Transaction {
         } catch (Exception e) {
             logger.error("Unexpected: " + e.getLocalizedMessage(), e.getCause());
             executor.revertCommands();
+            executor.clearCommands();
             logger.error("Applied revert on database.");
         }
 
         finishTransaction();
-        return this;
     }
 
     /**

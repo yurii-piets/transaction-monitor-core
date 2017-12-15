@@ -46,7 +46,7 @@ public interface Transaction extends And {
     /**
      * Commits queries to all databases
      */
-    And commit();
+    void commit();
 
     /**
      * makes possible to call methods of this class in sequence
