@@ -4,7 +4,7 @@ public class SQLQueryException extends Exception {
 
     private final static String message = "SQL query cannot be executed on database";
 
-    public SQLQueryException(Throwable cause) {
-        super(message, cause);
+    public SQLQueryException(Throwable cause, String sql) {
+        super(message + ": " + sql, cause);
     }
 }

@@ -51,7 +51,7 @@ public class ConnectionService {
         return connection;
     }
 
-    public void releaseConnections(){
+    public void releaseConnections() {
         for (Connection connection : cachedConnections.values()) {
             connectionPool.release(connection);
         }

@@ -42,10 +42,13 @@ public class ConnectionPoolImpl implements ConnectionPool {
         Queue<Connection> availableQueue = available.get(qualifier);
         if (availableQueue == null) {
             connection = createConnectionByQualifier(qualifier);
+
+            addPoolConnection(qualifier, connection);
         } else if (availableQueue.isEmpty()) {
             Queue<Connection> pollQueue = pool.get(qualifier);
             if (pollQueue.size() <= DEFAULT_SIZE) {
                 connection = createConnectionByQualifier(qualifier);
+                addPoolConnection(qualifier, connection);
             } else {
                 throw new IllegalStateException("Pool is empty and not able to create new connection.");
 //                try {
@@ -62,12 +65,18 @@ public class ConnectionPoolImpl implements ConnectionPool {
         }
 
         addAcquiredConnection(qualifier, connection);
-        addPoolConnection(qualifier, connection);
         return connection;
     }
 
     @Override
     public void release(Connection connection) {
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            logger.warn("Connection cannot be reales connection will be closed.");
+            destroyConnection(connection);
+        }
+
         String qualifier = getQualifierByConnection(connection);
 
         if (qualifier == null) {
@@ -76,6 +85,19 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
         removeAcquired(qualifier, connection);
         addAvailableConnection(qualifier, connection);
+    }
+
+    private void destroyConnection(Connection connection) {
+        try {
+            connection.close();
+        } catch (SQLException e1) {
+            //jdbc is joking
+        }
+        String qualifier = getQualifierByConnection(connection);
+        if (qualifier != null) {
+            removeAcquired(qualifier, connection);
+            removePool(qualifier, connection);
+        }
     }
 
     private Connection createConnectionByQualifier(String qualifier) throws SQLException {
@@ -142,13 +164,17 @@ public class ConnectionPoolImpl implements ConnectionPool {
         acquiredConnectionsQueue.add(connection);
     }
 
-    private void removeAvailable(String qualifier, Connection connection) {
-        Queue<Connection> availableConnectionQueue = available.get(qualifier);
-        availableConnectionQueue.remove(connection);
+    private void removePool(String qualifier, Connection connection) {
+        Queue<Connection> poolConnectionQueue = pool.get(qualifier);
+        if (poolConnectionQueue != null) {
+            poolConnectionQueue.remove(connection);
+        }
     }
 
     private void removeAcquired(String qualifier, Connection connection) {
         Queue<Connection> acquiredConnections = acquired.get(qualifier);
-        acquiredConnections.remove(connection);
+        if (acquiredConnections != null) {
+            acquiredConnections.remove(connection);
+        }
     }
 }

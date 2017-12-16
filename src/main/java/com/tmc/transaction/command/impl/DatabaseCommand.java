@@ -11,7 +11,6 @@ import lombok.Data;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 
 /**
@@ -41,7 +40,6 @@ public class DatabaseCommand implements RevertibleCommand {
      * before execution initialise the Savepoint variable
      *
      * @see Statement
-     * @see Savepoint
      */
     @Override
     public void execute() throws SQLQueryException, SQLSavepointCreationException, SQLStatementException {
@@ -59,16 +57,14 @@ public class DatabaseCommand implements RevertibleCommand {
         }
 
         try {
-            statement.execute(sql);
+             statement.execute(sql);
         } catch (SQLException e) {
-            throw new SQLQueryException(e);
+            throw new SQLQueryException(e, sql);
         }
     }
 
     /**
      * Reverts execution of a command by releasing current savepoint
-     *
-     * @see Savepoint
      */
     @Override
     public void revert() throws SQLRevertException {
