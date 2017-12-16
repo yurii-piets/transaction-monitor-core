@@ -44,13 +44,13 @@ public class MainTest {
     @Before
     public void initDB() throws IOException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathInit1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathInit2)
-                .and()
+            .and()
                 .commit();
     }
 
@@ -101,13 +101,13 @@ public class MainTest {
     @Test
     public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2.toFile())
-                .and()
+            .and()
                 .commit();
 
         assertSuccessfulQueriesOnTmOne();
@@ -117,13 +117,13 @@ public class MainTest {
     @Test
     public void runFirstFailedSecondSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathRollback1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2)
-                .and()
+            .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -178,9 +178,9 @@ public class MainTest {
     public void runEmptyQuery() {
         transactionService.newTransaction()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, "")
-                .and()
+            .and()
                 .commit();
     }
 
