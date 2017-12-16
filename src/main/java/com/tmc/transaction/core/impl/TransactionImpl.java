@@ -132,7 +132,9 @@ public class TransactionImpl implements Transaction {
      */
     private void turnOffAutoCommit(Connection connection) throws SQLAutoCommitException {
         try {
-            connection.setAutoCommit(false);
+            if(connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+            }
         } catch (SQLException e) {
             throw new SQLAutoCommitException(e);
         }

@@ -47,14 +47,15 @@ public class ConnectionPoolImpl implements ConnectionPool {
             if (pollQueue.size() <= DEFAULT_SIZE) {
                 connection = createConnectionByQualifier(qualifier);
             } else {
-                try {
-                    while (availableQueue.isEmpty()) {
-                        wait();
-                    }
-                    connection = availableQueue.poll();
-                } catch (InterruptedException e) {
-                    logger.error("Unexpected: ", e);
-                }
+                throw new IllegalStateException("Pool is empty and not able to create new connection.");
+//                try {
+//                    while (availableQueue.isEmpty()) {
+//                        wait();
+//                    }
+//                    connection = availableQueue.poll();
+//                } catch (InterruptedException e) {
+//                    logger.error("Unexpected: ", e);
+//                }
             }
         } else {
             connection = availableQueue.poll();

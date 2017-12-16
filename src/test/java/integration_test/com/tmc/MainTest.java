@@ -38,7 +38,7 @@ public class MainTest {
 
     private final TMTestUtil testUtil = new TMTestUtil();
 
-    public MainTest() throws URISyntaxException {
+    public MainTest() throws URISyntaxException, SQLException {
     }
 
     @Before

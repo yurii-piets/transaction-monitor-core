@@ -8,7 +8,6 @@ import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,7 +22,6 @@ import java.sql.Statement;
  */
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class DatabaseCommand implements RevertibleCommand {
 
     /**
@@ -37,13 +35,6 @@ public class DatabaseCommand implements RevertibleCommand {
      * Sql query that is executed
      */
     private final String sql;
-
-    /**
-     * Savepoint that is created before executing the query
-     *
-     * @see Savepoint
-     */
-    private Savepoint savepoint;
 
     /**
      * Creates statement and execute it on a database that current connection is established on.
@@ -81,14 +72,8 @@ public class DatabaseCommand implements RevertibleCommand {
      */
     @Override
     public void revert() throws SQLRevertException {
-        try {
-            connection.releaseSavepoint(savepoint);
-        } catch (SQLException e) {
-            throw new SQLRevertException(e);
-        }
     }
 
     private void initSavepoint() throws SQLException {
-        savepoint = connection.setSavepoint();
     }
 }
