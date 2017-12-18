@@ -5,7 +5,6 @@ import com.tmc.exception.SQLConnectionException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,11 +40,7 @@ public class ConnectionService {
         }
 
         Connection connection;
-        try {
-            connection = connectionPool.acquire(qualifier);
-        } catch (SQLException e) {
-            throw new SQLConnectionException(e);
-        }
+        connection = connectionPool.acquire(qualifier);
         cachedConnections.put(qualifier, connection);
 
         return connection;

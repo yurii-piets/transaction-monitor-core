@@ -1,6 +1,7 @@
 package com.tmc.connection.pool.impl;
 
 import com.tmc.connection.pool.def.ConnectionPool;
+import com.tmc.exception.SQLConnectionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,12 +13,15 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class ConnectionPoolImpl implements ConnectionPool {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     private final static int DEFAULT_SIZE = 10;
+
+    private final static int CONNECTION_ATTEMPTS = 3;
 
     private final Map<String, DataSource> dataSources;
 
@@ -32,17 +36,16 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public Connection acquire(String qualifier) throws SQLException {
+    public Connection acquire(String qualifier) throws SQLConnectionException {
         if (qualifier == null) {
             throw new IllegalArgumentException("Database qualifier cannot be null.");
         }
 
-        Connection connection = null;
+        Connection connection;
 
         Queue<Connection> availableQueue = available.get(qualifier);
         if (availableQueue == null) {
             connection = createConnectionByQualifier(qualifier);
-
             addPoolConnection(qualifier, connection);
         } else if (availableQueue.isEmpty()) {
             Queue<Connection> pollQueue = pool.get(qualifier);
@@ -50,15 +53,14 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 connection = createConnectionByQualifier(qualifier);
                 addPoolConnection(qualifier, connection);
             } else {
-                throw new IllegalStateException("Pool is empty and not able to create new connection.");
-//                try {
-//                    while (availableQueue.isEmpty()) {
-//                        wait();
-//                    }
-//                    connection = availableQueue.poll();
-//                } catch (InterruptedException e) {
-//                    logger.error("Unexpected: ", e);
-//                }
+                try {
+                    while (availableQueue.isEmpty()) {
+                        TimeUnit.SECONDS.sleep(1);
+                    }
+                } catch (InterruptedException e) {
+                    logger.error("Unexpected", e);
+                }
+                connection = availableQueue.poll();
             }
         } else {
             connection = availableQueue.poll();
@@ -73,7 +75,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         try {
             connection.commit();
         } catch (SQLException e) {
-            logger.warn("Connection cannot be reales connection will be closed.");
+            logger.warn("Connection cannot be released, connection will be closed.", connection);
             destroyConnection(connection);
         }
 
@@ -90,8 +92,8 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private void destroyConnection(Connection connection) {
         try {
             connection.close();
-        } catch (SQLException e1) {
-            //jdbc is joking
+        } catch (SQLException e) {
+            logger.error("Unexpected: ", e);
         }
         String qualifier = getQualifierByConnection(connection);
         if (qualifier != null) {
@@ -100,7 +102,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         }
     }
 
-    private Connection createConnectionByQualifier(String qualifier) throws SQLException {
+    private Connection createConnectionByQualifier(String qualifier) throws SQLConnectionException {
         if (!dataSources.containsKey(qualifier)) {
             throw new IllegalArgumentException("No database source can be accessed via qualifier \"" + qualifier + "\"");
         }
@@ -110,7 +112,23 @@ public class ConnectionPoolImpl implements ConnectionPool {
             throw new IllegalArgumentException("No database source can be accessed via qualifier \"" + qualifier + "\"");
         }
 
-        Connection connection = dataSource.getConnection();
+        Connection connection = createConnectionWithAttempts(dataSource);
+        return connection;
+    }
+
+    private Connection createConnectionWithAttempts(DataSource dataSource) throws SQLConnectionException {
+        Connection connection = null;
+        for (int i = 0; i < CONNECTION_ATTEMPTS; i++) {
+            try {
+                connection = dataSource.getConnection();
+                break;
+            } catch (SQLException e) {
+                logger.warn("Unable to establish connection. Attempt #" + (i + 1));
+                if (i == 2) {
+                    throw new SQLConnectionException(e);
+                }
+            }
+        }
         return connection;
     }
 
