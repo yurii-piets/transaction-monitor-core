@@ -66,6 +66,14 @@ public class ConnectionPoolImpl implements ConnectionPool {
             connection = availableQueue.poll();
         }
 
+        try {
+            if(connection == null || connection.isClosed()) {
+                acquire(qualifier);
+            }
+        } catch (SQLException e) {
+            logger.error("Unexpected: ", e);
+        }
+
         addAcquiredConnection(qualifier, connection);
         return connection;
     }
@@ -77,6 +85,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         } catch (SQLException e) {
             logger.warn("Connection cannot be released, connection will be closed.", connection);
             destroyConnection(connection);
+            return;
         }
 
         String qualifier = getQualifierByConnection(connection);
