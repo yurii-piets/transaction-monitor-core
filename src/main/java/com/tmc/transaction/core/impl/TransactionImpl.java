@@ -95,7 +95,7 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And commit() {
+    public void commit() {
         try {
             logger.info("Performing transaction.");
             executor.executeCommands();
@@ -104,11 +104,11 @@ public class TransactionImpl implements Transaction {
         } catch (Exception e) {
             logger.error("Unexpected: " + e.getLocalizedMessage(), e.getCause());
             executor.revertCommands();
+            executor.clearCommands();
             logger.error("Applied revert on database.");
         }
 
         finishTransaction();
-        return this;
     }
 
     /**
@@ -132,7 +132,9 @@ public class TransactionImpl implements Transaction {
      */
     private void turnOffAutoCommit(Connection connection) throws SQLAutoCommitException {
         try {
-            connection.setAutoCommit(false);
+            if(connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+            }
         } catch (SQLException e) {
             throw new SQLAutoCommitException(e);
         }
@@ -165,14 +167,6 @@ public class TransactionImpl implements Transaction {
      * close opened connection in current transaction
      */
     private void finishTransaction() {
-        for (String qualifier : activeQualifiers) {
-            try {
-                Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                connection.close();
-            } catch (SQLException | SQLConnectionException e) {
-                logger.error("Unexpected: ", e);
-            }
-        }
-        connectionService.clearCache();
+        connectionService.releaseConnections();
     }
 }

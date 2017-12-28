@@ -38,19 +38,19 @@ public class MainTest {
 
     private final TMTestUtil testUtil = new TMTestUtil();
 
-    public MainTest() throws URISyntaxException {
+    public MainTest() throws URISyntaxException, SQLException {
     }
 
     @Before
     public void initDB() throws IOException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathInit1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathInit2)
-                .and()
+            .and()
                 .commit();
     }
 
@@ -101,13 +101,13 @@ public class MainTest {
     @Test
     public void runSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2.toFile())
-                .and()
+            .and()
                 .commit();
 
         assertSuccessfulQueriesOnTmOne();
@@ -117,13 +117,13 @@ public class MainTest {
     @Test
     public void runFirstFailedSecondSuccessfulQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathRollback1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathCommit2)
-                .and()
+            .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -133,13 +133,13 @@ public class MainTest {
     @Test
     public void runFirstSuccessSecondFailedQueriesFromFiles() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathCommit1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathRollback2)
-                .and()
+            .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -149,13 +149,13 @@ public class MainTest {
     @Test
     public void runFailedQueriesFromFile() throws IOException, SQLException {
         transactionService.newTransaction()
-                .and()
+            .and()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, pathRollback1)
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, pathRollback2)
-                .and()
+            .and()
                 .commit();
 
         assertFailedQueriesOnTmOne();
@@ -178,9 +178,9 @@ public class MainTest {
     public void runEmptyQuery() {
         transactionService.newTransaction()
                 .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, "")
-                .and()
+            .and()
                 .commit();
     }
 
@@ -195,13 +195,13 @@ public class MainTest {
         transaction1
                 .addStatement(TMONE_QUALIFIER,
                         "insert into klienci values(77, 'Test Failed', 'Test Failed', '000 000 000');")
-                .and()
+            .and()
                 .addStatement(TMTWO_QUALIFIER, "delete from studenci where idstudenta = 7");
 
         transaction2
                 .addStatement(TMTWO_QUALIFIER,
                         "delete from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;")
-                .and()
+            .and()
                 .addStatement(TMONE_QUALIFIER, "insert into zamowienia values(16, 1, 'Test Successful');");
 
         transaction1

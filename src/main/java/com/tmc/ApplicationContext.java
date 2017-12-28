@@ -1,6 +1,8 @@
 package com.tmc;
 
 import com.tmc.connection.config.DatabaseConfig;
+import com.tmc.connection.pool.def.ConnectionPool;
+import com.tmc.connection.pool.impl.ConnectionPoolImpl;
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.connection.services.PropertyService;
 import com.tmc.transaction.core.def.Transaction;
@@ -21,7 +23,9 @@ public final class ApplicationContext {
 
     private PropertyService propertyService;
 
-    private final Map<String, DataSource> dataSources = new HashMap<>();
+    private ConnectionPool connectionPool;
+
+    private Map<String, DataSource> dataSources;
 
     private ApplicationContext() {
         databaseConfig();
@@ -29,13 +33,13 @@ public final class ApplicationContext {
 
     private DatabaseConfig databaseConfig() {
         if (databaseConfig == null) {
-            databaseConfig = new DatabaseConfig(this, propertyService());
+            databaseConfig = new DatabaseConfig(dataSources(), propertyService());
         }
 
         return databaseConfig;
     }
 
-    public PropertyService propertyService() {
+    private PropertyService propertyService() {
         if (propertyService == null) {
             propertyService = new PropertyService();
         }
@@ -43,27 +47,35 @@ public final class ApplicationContext {
         return propertyService;
     }
 
-    public ConnectionService connectionService() {
-        return new ConnectionService(context);
+    private ConnectionPool connectionPool() {
+        if (connectionPool == null) {
+            connectionPool = new ConnectionPoolImpl(dataSources());
+        }
+
+        return connectionPool;
     }
 
-    public CommandsExecutor commandsExecutor() {
+    private ConnectionService connectionService() {
+        return new ConnectionService(connectionPool());
+    }
+
+    private CommandsExecutor commandsExecutor() {
         return new DatabaseCommandExecutor();
+    }
+
+    private Map<String, DataSource> dataSources() {
+        if (dataSources == null) {
+            dataSources = new HashMap<>();
+        }
+
+        return dataSources;
     }
 
     static TransactionService transactionService() {
         return new TransactionService(context);
     }
 
-    public Transaction transaction(){
+    public Transaction transaction() {
         return new TransactionImpl(connectionService(), commandsExecutor());
-    }
-
-    public DataSource getDataSourceByQualifier(String qualifier) {
-        return dataSources.get(qualifier);
-    }
-
-    public void addDataSource(String qualifier, DataSource dataSource) {
-        dataSources.put(qualifier, dataSource);
     }
 }

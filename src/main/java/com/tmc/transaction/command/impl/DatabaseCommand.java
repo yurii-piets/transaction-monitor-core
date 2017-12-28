@@ -68,9 +68,9 @@ public class DatabaseCommand implements RevertibleCommand {
         }
 
         try {
-            statement.execute(sql);
+             statement.execute(sql);
         } catch (SQLException e) {
-            throw new SQLQueryException(e);
+            throw new SQLQueryException(e, sql);
         }
     }
 
@@ -82,7 +82,7 @@ public class DatabaseCommand implements RevertibleCommand {
     @Override
     public void revert() throws SQLRevertException {
         try {
-            connection.releaseSavepoint(savepoint);
+            connection.rollback(savepoint);
         } catch (SQLException e) {
             throw new SQLRevertException(e);
         }
