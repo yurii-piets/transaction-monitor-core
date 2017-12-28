@@ -10,6 +10,11 @@ import java.sql.SQLException;
 
 class TMTestUtil {
 
+    private static final String TMONE_USER = System.getenv().get("PG_USER");
+    private static final String TMONE_PASSWORD = System.getenv().get("PG_PASSWORD");
+    private static final String TMTWO_USER = System.getenv().get("PG_USER");
+    private static final String TMTWO_PASSWORD = System.getenv().get("PG_PASSWORD");
+
     private final Logger logger = LogManager.getLogger(this.getClass());
 
     private Connection connectionTmone;
@@ -28,8 +33,8 @@ class TMTestUtil {
     private void initDataSourceTmone() throws SQLException {
         BasicDataSource dataSourceTmone = new BasicDataSource();
         dataSourceTmone.setUrl("jdbc:postgresql://localhost:5432/tmone");
-        dataSourceTmone.setUsername("postgres");
-        dataSourceTmone.setPassword("");
+        dataSourceTmone.setUsername(TMONE_USER);
+        dataSourceTmone.setPassword(TMONE_PASSWORD);
         dataSourceTmone.setDriverClassName("org.postgresql.Driver");
         connectionTmone = dataSourceTmone.getConnection();
     }
@@ -37,8 +42,8 @@ class TMTestUtil {
     private void initDataSourceTmtwo() throws SQLException {
         BasicDataSource dataSourceTmtwo = new BasicDataSource();
         dataSourceTmtwo.setUrl("jdbc:postgresql://localhost:5432/tmtwo");
-        dataSourceTmtwo.setUsername("postgres");
-        dataSourceTmtwo.setPassword("");
+        dataSourceTmtwo.setUsername(TMTWO_USER);
+        dataSourceTmtwo.setPassword(TMTWO_PASSWORD);
         dataSourceTmtwo.setDriverClassName("org.postgresql.Driver");
         connectionTmtwo = dataSourceTmtwo.getConnection();
     }
