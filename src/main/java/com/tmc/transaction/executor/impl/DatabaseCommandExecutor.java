@@ -50,6 +50,9 @@ public class DatabaseCommandExecutor implements CommandsExecutor {
 
     @Override
     public void revertCommands() {
+
+        //TODO: execute the dump file
+
         while (!applied.isEmpty()) {
             Command command = applied.pollFirst();
             if (command instanceof RevertibleCommand) {

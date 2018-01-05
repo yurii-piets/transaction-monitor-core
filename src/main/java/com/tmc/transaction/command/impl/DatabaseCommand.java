@@ -6,13 +6,14 @@ import com.tmc.exception.SQLSavepointCreationException;
 import com.tmc.exception.SQLStatementException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
+import com.tmc.transaction.savepoint.def.Savepoint;
+import com.tmc.transaction.savepoint.impl.DumpSavepoint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 
 /**
@@ -54,6 +55,8 @@ public class DatabaseCommand implements RevertibleCommand {
      */
     @Override
     public void execute() throws SQLQueryException, SQLSavepointCreationException, SQLStatementException {
+
+        //TODO: dump append
         try {
             initSavepoint();
         } catch (SQLException e) {
@@ -82,13 +85,17 @@ public class DatabaseCommand implements RevertibleCommand {
     @Override
     public void revert() throws SQLRevertException {
         try {
-            connection.rollback(savepoint);
+            savepoint.revert();
         } catch (SQLException e) {
             throw new SQLRevertException(e);
         }
     }
 
     private void initSavepoint() throws SQLException {
-        savepoint = connection.setSavepoint();
+        //TODO: maybe have the transaction create and delete the dumpFile,
+        //TODO: and have this method retrieve a savepoint corresponding to said file?
+
+        savepoint = new DumpSavepoint(connection, sql);
+        savepoint.setSavepoint();
     }
 }
