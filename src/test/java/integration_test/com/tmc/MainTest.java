@@ -289,38 +289,27 @@ public class MainTest {
 
         Transaction transaction2 = transactionService.newTransaction();
 
-        Thread threadTwo = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
-                transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback successful';");
-                transaction2.addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';");
-                transaction2.commit();
-            }
-        });
+        new Thread(() -> {
+            transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+            transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='trans2 update successful';")
+                    .and()
+                        .addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';");
+            transaction2.commit();
+        }).start();
 
-
-        Thread threadOne = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
-                transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+        transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+        transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
                         .and()
                             .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
                         .and()
-                            .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';");
-
-                threadTwo.run();
-
-                transaction1.addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                            .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';")
+                        .and()
+                            .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='ieit';")
                         .and()
                             .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');");
 
-                transaction1.commit();
-            }
-        });
+        transaction1.commit();
 
-        threadOne.run();
 
         ResultSet resultSet5 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
         resultSet5.next();
@@ -333,7 +322,7 @@ public class MainTest {
         assertTrue(resultSet7.next());
 
         ResultSet resultSet8 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
-        assertTrue(resultSet8.next());
+        assertFalse(resultSet8.next());
     }
 
     @Test
@@ -342,40 +331,29 @@ public class MainTest {
 
         Transaction transaction2 = transactionService.newTransaction();
 
-        Thread threadTwo = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread( () -> {
                 transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
-                transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback';");
-                transaction2.addStatement(TMTWO_QUALIFIER, "insert into studenci values\n" +
-                        "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');");
+                transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback';")
+                        .and()
+                            .addStatement(TMTWO_QUALIFIER, "insert into studenci values" +
+                            "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');");
                 transaction2.commit();
-            }
-        });
+            System.out.println("watek2 " + System.currentTimeMillis());
+        }).start();
 
+        transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
 
-        Thread threadOne = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+        transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                .and()
+                    .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');");
 
-                threadTwo.run();
-                transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';");
-                transaction1.addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
-                        .and()
-                            .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';");
-
-
-
-                transaction1.addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
-                        .and()
-                        .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');");
-
-                transaction1.commit();
-            }
-        });
-
-        threadOne.run();
+        transaction1.commit();
 
         ResultSet resultSet5 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
         resultSet5.next();
