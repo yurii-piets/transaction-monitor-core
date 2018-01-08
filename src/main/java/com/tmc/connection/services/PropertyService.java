@@ -8,6 +8,7 @@ import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +29,8 @@ public class PropertyService {
     private Set<String> qualifiers;
 
     private Set<Properties> properties;
+
+    private final static String ENVIRONMENTAL_VARIABLE_PATTERN = "^(\\$\\{).*(\\})$";
 
     public PropertyService() {
         initQualifiers();
@@ -87,12 +90,27 @@ public class PropertyService {
     }
 
     private String getPropertyByName(String key) {
+        String propertyValue = null;
         for (Properties property : properties) {
             if (property.containsKey(key)) {
-                return property.getProperty(key);
+                propertyValue = property.getProperty(key);
             }
         }
 
-        return null;
+        if(propertyValue != null && propertyValue.matches(ENVIRONMENTAL_VARIABLE_PATTERN)){
+            propertyValue = getEnvironmentalVariable(propertyValue);
+        }
+
+        return propertyValue;
+    }
+
+    private String getEnvironmentalVariable(String property) {
+        Map<String, String> environment = System.getenv();
+
+        String propertyName = property
+                .replaceFirst("\\$\\{", "")
+                .replaceFirst("}$", "");
+
+        return environment.get(propertyName);
     }
 }
