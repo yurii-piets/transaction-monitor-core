@@ -338,7 +338,6 @@ public class MainTest {
                             .addStatement(TMTWO_QUALIFIER, "insert into studenci values" +
                             "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');");
                 transaction2.commit();
-            System.out.println("watek2 " + System.currentTimeMillis());
         }).start();
 
         transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
