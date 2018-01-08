@@ -1,5 +1,5 @@
-drop table klienci;
-drop table zamowienia;
+drop table if exists klienci;
+drop table if exists zamowienia;
 
 begin;
 

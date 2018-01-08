@@ -1,5 +1,5 @@
-drop table studenci;
-drop table oceny;
+drop table if exists studenci;
+drop table if exists oceny;
 
 begin;
 

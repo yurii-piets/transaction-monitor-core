@@ -283,6 +283,113 @@ public class MainTest {
         }
     }
 
+    @Test
+    public void runSuccessfulTransactionsOnDifferentThreads() throws SQLException {
+        Transaction transaction1 = transactionService.newTransaction();
+
+        Transaction transaction2 = transactionService.newTransaction();
+
+        Thread threadTwo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+                transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback successful';");
+                transaction2.addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';");
+                transaction2.commit();
+                System.out.println("tmtwo " + System.currentTimeMillis());
+            }
+        });
+
+
+        Thread threadOne = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+                transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+                        .and()
+                            .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
+                        .and()
+                            .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';");
+
+                threadTwo.run();
+
+                transaction1.addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                        .and()
+                            .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');");
+
+                transaction1.commit();
+            }
+        });
+
+        threadOne.run();
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        resultSet5.next();
+        assertEquals(14, resultSet5.getInt("total"));
+
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
+        assertTrue(resultSet6.next());
+
+        ResultSet resultSet7 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet7.next());
+
+        ResultSet resultSet8 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
+        assertTrue(resultSet8.next());
+    }
+
+    @Test
+    public void runRollbackFromAnotherThreadWithinASuccessfulTransaction() throws SQLException {
+        Transaction transaction1 = transactionService.newTransaction();
+
+        Transaction transaction2 = transactionService.newTransaction();
+
+        Thread threadTwo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                transaction2.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+                transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback';");
+                transaction2.addStatement(TMTWO_QUALIFIER, "insert into studenci values\n" +
+                        "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');");
+                transaction2.commit();
+                System.out.println("tmtwo " + System.currentTimeMillis());
+            }
+        });
+
+
+        Thread threadOne = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                transaction1.begin(TMONE_QUALIFIER, TMTWO_QUALIFIER);
+
+                threadTwo.run();
+                transaction1.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';");
+                transaction1.addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
+                        .and()
+                            .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';");
+
+
+
+                transaction1.addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                        .and()
+                        .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');");
+
+                transaction1.commit();
+            }
+        });
+
+        threadOne.run();
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        resultSet5.next();
+        assertEquals(14, resultSet5.getInt("total"));
+
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
+        assertTrue(resultSet6.next());
+
+        ResultSet resultSet7 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet7.next());
+    }
+
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {
         ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dalka' AND miejscowosc='Krakow' AND telefon='666 666 666';");
         assertTrue(resultSet.next());
@@ -398,4 +505,6 @@ public class MainTest {
                 " OR wydzial='EXCEPTION THROWN';");
         assertFalse(resultSet12.next());
     }
+
+
 }
