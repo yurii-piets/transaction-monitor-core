@@ -296,7 +296,6 @@ public class MainTest {
                 transaction2.addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback successful';");
                 transaction2.addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';");
                 transaction2.commit();
-                System.out.println("tmtwo " + System.currentTimeMillis());
             }
         });
 
@@ -351,7 +350,6 @@ public class MainTest {
                 transaction2.addStatement(TMTWO_QUALIFIER, "insert into studenci values\n" +
                         "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');");
                 transaction2.commit();
-                System.out.println("tmtwo " + System.currentTimeMillis());
             }
         });
 
