@@ -285,8 +285,8 @@ public class MainTest {
 
     @Test
     public void runSuccessfulTransactionsInDifferentThreads() throws SQLException, InterruptedException {
-        Thread thread1 = executeDoubleSuccessfulThreadOne();
-        Thread thread2 = executeDoubleSuccessfulThreadTwo();
+        Thread thread1 = executeBothThreadsSuccessfulThreadOne();
+        Thread thread2 = executeBothThreadsSuccessfulThreadTwo();
 
         thread1.start();
         thread2.start();
@@ -310,8 +310,8 @@ public class MainTest {
 
     @Test
     public void runRollbackFromAnotherThreadWithinASuccessfulTransaction() throws SQLException, InterruptedException {
-        Thread thread1 = executeFailedAndSuccessfulThreadOne();
-        Thread thread2 = executeFailedAndSuccessfulThreadTwo();
+        Thread thread1 = executeMixedThreadsFailingThread();
+        Thread thread2 = executeMixedThreadsSuccessfulThread();
 
         thread1.start();
         thread2.start();
@@ -446,7 +446,7 @@ public class MainTest {
         assertFalse(resultSet12.next());
     }
 
-    private Thread executeDoubleSuccessfulThreadOne() {
+    private Thread executeBothThreadsSuccessfulThreadOne() {
         return new Thread(() -> transactionService
                 .newTransaction()
                 .and()
@@ -460,7 +460,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeDoubleSuccessfulThreadTwo() {
+    private Thread executeBothThreadsSuccessfulThreadTwo() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
@@ -480,7 +480,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeFailedAndSuccessfulThreadOne() {
+    private Thread executeMixedThreadsFailingThread() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
@@ -495,7 +495,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeFailedAndSuccessfulThreadTwo() {
+    private Thread executeMixedThreadsSuccessfulThread() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
