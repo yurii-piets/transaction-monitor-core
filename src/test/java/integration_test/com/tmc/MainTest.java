@@ -294,25 +294,25 @@ public class MainTest {
         thread1.join();
         thread2.join();
 
-        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
-        resultSet1.next();
-        assertEquals(14, resultSet1.getInt("total"));
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='update successful'");
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='trans2 update successful'");
+        assertTrue(resultSet1.next() || resultSet2.next() );
 
-        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
-        assertTrue(resultSet2.next());
-
-        ResultSet resultSet3 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        ResultSet resultSet3 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
         assertTrue(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
-        assertFalse(resultSet4.next());
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet4.next());
 
-        ResultSet resultSet5 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='ieit'");
+        ResultSet resultSet5 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
         assertFalse(resultSet5.next());
 
-        ResultSet resultSet6 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
-        resultSet6.next();
-        assertEquals(3, resultSet6.getInt("total"));
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='ieit'");
+        assertFalse(resultSet6.next());
+
+        ResultSet resultSet7 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet7.next();
+        assertEquals(3, resultSet7.getInt("total"));
     }
 
     @Test
@@ -326,22 +326,22 @@ public class MainTest {
         thread1.join();
         thread2.join();
 
-        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select count(*) as total from zamowienia where opis='update successful'");
-        resultSet1.next();
-        assertEquals(14, resultSet1.getInt("total"));
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='update successful'");
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='rollback'");
+        assertTrue(resultSet1.next() || resultSet2.next() );
 
-        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
-        assertTrue(resultSet2.next());
+        ResultSet resultSet3 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
+        assertTrue(resultSet3.next());
 
-        ResultSet resultSet3 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
-        resultSet3.next();
-        assertEquals(3, resultSet3.getInt("total"));
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet4.next();
+        assertEquals(3, resultSet4.getInt("total"));
 
-        ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='imir'");
-        assertFalse(resultSet4.next());
+        ResultSet resultSet5 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='imir'");
+        assertFalse(resultSet5.next());
 
-        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
-        assertTrue(resultSet5.next());
+        ResultSet resultSet6 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet6.next());
 
 
     }
@@ -464,15 +464,15 @@ public class MainTest {
 
     private Thread getBothThreadsSuccessfulTestThreadOne() {
         return new Thread(() -> transactionService
-                .newTransaction()
+                    .newTransaction()
                 .and()
-                .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
                 .and()
-                .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='trans2 update successful';")
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='trans2 update successful';")
                 .and()
-                .addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';")
+                    .addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';")
                 .and()
-                .commit()
+                    .commit()
         );
     }
 
