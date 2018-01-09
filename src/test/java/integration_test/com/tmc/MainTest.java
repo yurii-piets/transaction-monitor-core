@@ -306,10 +306,17 @@ public class MainTest {
 
         ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
         assertFalse(resultSet4.next());
+
+        ResultSet resultSet5 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='ieit'");
+        assertFalse(resultSet5.next());
+
+        ResultSet resultSet6 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet6.next();
+        assertEquals(3, resultSet6.getInt("total"));
     }
 
     @Test
-    public void runRollbackFromAnotherThreadWithinASuccessfulTransaction() throws SQLException, InterruptedException {
+    public void runSuccessfulAndRollbackTransactionsInDifferentThreads() throws SQLException, InterruptedException {
         Thread thread1 = executeMixedThreadsFailingThread();
         Thread thread2 = executeMixedThreadsSuccessfulThread();
 
@@ -326,8 +333,17 @@ public class MainTest {
         ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
         assertTrue(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
-        assertTrue(resultSet3.next());
+        ResultSet resultSet3 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet3.next();
+        assertEquals(3, resultSet3.getInt("total"));
+
+        ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='imir'");
+        assertFalse(resultSet4.next());
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet5.next());
+
+
     }
 
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {
@@ -501,13 +517,13 @@ public class MainTest {
                 .and()
                     .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
                 .and()
-                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+                    .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
                 .and()
                     .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
                 .and()
                     .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';")
                 .and()
-                    .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
                 .and()
                     .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');")
                 .and()
