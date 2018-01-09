@@ -285,8 +285,8 @@ public class MainTest {
 
     @Test
     public void runSuccessfulTransactionsInDifferentThreads() throws SQLException, InterruptedException {
-        Thread thread1 = executeBothThreadsSuccessfulThreadOne();
-        Thread thread2 = executeBothThreadsSuccessfulThreadTwo();
+        Thread thread1 = getBothThreadsSuccessfulTestThreadOne();
+        Thread thread2 = getBothThreadsSuccessfulTestThreadTwo();
 
         thread1.start();
         thread2.start();
@@ -317,8 +317,8 @@ public class MainTest {
 
     @Test
     public void runSuccessfulAndRollbackTransactionsInDifferentThreads() throws SQLException, InterruptedException {
-        Thread thread1 = executeMixedThreadsFailingThread();
-        Thread thread2 = executeMixedThreadsSuccessfulThread();
+        Thread thread1 = getMixedThreadsTestFailingThread();
+        Thread thread2 = getMixedThreadsTestSuccessfulThread();
 
         thread1.start();
         thread2.start();
@@ -462,7 +462,7 @@ public class MainTest {
         assertFalse(resultSet12.next());
     }
 
-    private Thread executeBothThreadsSuccessfulThreadOne() {
+    private Thread getBothThreadsSuccessfulTestThreadOne() {
         return new Thread(() -> transactionService
                 .newTransaction()
                 .and()
@@ -476,7 +476,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeBothThreadsSuccessfulThreadTwo() {
+    private Thread getBothThreadsSuccessfulTestThreadTwo() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
@@ -496,7 +496,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeMixedThreadsFailingThread() {
+    private Thread getMixedThreadsTestFailingThread() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
@@ -511,7 +511,7 @@ public class MainTest {
         );
     }
 
-    private Thread executeMixedThreadsSuccessfulThread() {
+    private Thread getMixedThreadsTestSuccessfulThread() {
         return new Thread( () -> transactionService
                     .newTransaction()
                 .and()
