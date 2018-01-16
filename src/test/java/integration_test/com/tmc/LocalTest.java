@@ -25,14 +25,14 @@ public class LocalTest {
     final static String TMONE_QUALIFIER = "tmone";
     final static String TMTWO_QUALIFIER = "tmtwo";
 
-    private final Path pathInit1 = Paths.get(getClass().getClassLoader().getResource("sql/init_db1.sql").toURI());
-    private final Path pathInit2 = Paths.get(getClass().getClassLoader().getResource("sql/init_db2.sql").toURI());
+    private final Path pathInit1 = Paths.get(getClass().getClassLoader().getResource("sql/psql/init_db1.sql").toURI());
+    private final Path pathInit2 = Paths.get(getClass().getClassLoader().getResource("sql/psql/init_db2.sql").toURI());
 
-    private final Path pathCommit1 = Paths.get(getClass().getClassLoader().getResource("sql/commit_db1.sql").toURI());
-    private final Path pathCommit2 = Paths.get(getClass().getClassLoader().getResource("sql/commit_db2.sql").toURI());
+    private final Path pathCommit1 = Paths.get(getClass().getClassLoader().getResource("sql/psql/commit_db1.sql").toURI());
+    private final Path pathCommit2 = Paths.get(getClass().getClassLoader().getResource("sql/psql/commit_db2.sql").toURI());
 
-    private final Path pathRollback1 = Paths.get(getClass().getClassLoader().getResource("sql/rollback_db1.sql").toURI());
-    private final Path pathRollback2 = Paths.get(getClass().getClassLoader().getResource("sql/rollback_db2.sql").toURI());
+    private final Path pathRollback1 = Paths.get(getClass().getClassLoader().getResource("sql/psql/rollback_db1.sql").toURI());
+    private final Path pathRollback2 = Paths.get(getClass().getClassLoader().getResource("sql/psql/rollback_db2.sql").toURI());
 
     private static final TransactionService transactionService = TMConfig.boot();
 
