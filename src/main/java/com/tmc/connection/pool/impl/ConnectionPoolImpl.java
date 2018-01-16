@@ -36,7 +36,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
-    public Connection acquire(String qualifier) throws SQLConnectionException {
+    public synchronized Connection acquire(String qualifier) throws SQLConnectionException {
         if (qualifier == null) {
             throw new IllegalArgumentException("Database qualifier cannot be null.");
         }
