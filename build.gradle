@@ -17,6 +17,16 @@ repositories {
     mavenCentral()
 }
 
+task localTest(type: Test) {
+    group = 'verification'
+    include '**/LocalTest.*'
+}
+
+task remoteTest(type: Test) {
+    group = 'verification'
+    include '**/RemoteTest.*'
+}
+
 dependencies {
     compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.16'

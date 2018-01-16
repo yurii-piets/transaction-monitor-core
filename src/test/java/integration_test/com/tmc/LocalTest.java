@@ -19,8 +19,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-@DatabaseProperty(path = MainTest.PROPERTY_SOURCE_FILE_NAME, qualifiers = {MainTest.TMONE_QUALIFIER, MainTest.TMTWO_QUALIFIER})
-public class MainTest {
+@DatabaseProperty(path = LocalTest.PROPERTY_SOURCE_FILE_NAME, qualifiers = {LocalTest.TMONE_QUALIFIER, LocalTest.TMTWO_QUALIFIER})
+public class LocalTest {
     final static String PROPERTY_SOURCE_FILE_NAME = "test.properties";
     final static String TMONE_QUALIFIER = "tmone";
     final static String TMTWO_QUALIFIER = "tmtwo";
@@ -38,7 +38,7 @@ public class MainTest {
 
     private final TMTestUtil testUtil = new TMTestUtil();
 
-    public MainTest() throws URISyntaxException, SQLException {
+    public LocalTest() throws URISyntaxException, SQLException {
     }
 
     @Before
