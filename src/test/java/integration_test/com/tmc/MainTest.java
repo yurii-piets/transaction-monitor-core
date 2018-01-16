@@ -283,6 +283,68 @@ public class MainTest {
         }
     }
 
+    @Test
+    public void runSuccessfulTransactionsInDifferentThreads() throws SQLException, InterruptedException {
+        Thread thread1 = getBothThreadsSuccessfulTestThreadOne();
+        Thread thread2 = getBothThreadsSuccessfulTestThreadTwo();
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='update successful'");
+        ResultSet resultSet2 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='trans2 update successful'");
+        assertTrue(resultSet1.next() || resultSet2.next() );
+
+        ResultSet resultSet3 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
+        assertTrue(resultSet3.next());
+
+        ResultSet resultSet4 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet4.next());
+
+        ResultSet resultSet5 = testUtil.getTmTwoQueryResult("select * from studenci where nazwa='update successful'");
+        assertFalse(resultSet5.next());
+
+        ResultSet resultSet6 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='ieit'");
+        assertFalse(resultSet6.next());
+
+        ResultSet resultSet7 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet7.next();
+        assertEquals(3, resultSet7.getInt("total"));
+    }
+
+    @Test
+    public void runSuccessfulAndRollbackTransactionsInDifferentThreads() throws SQLException, InterruptedException {
+        Thread thread1 = getMixedThreadsTestFailingThread();
+        Thread thread2 = getMixedThreadsTestSuccessfulThread();
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+
+        ResultSet resultSet1 = testUtil.getTmOneQueryResult("select * from zamowienia where opis='update successful'");
+        assertTrue(resultSet1.next());
+
+        ResultSet resultSet2 = testUtil.getTmTwoQueryResult("select * from oceny where idoceny=16");
+        assertTrue(resultSet2.next());
+
+        ResultSet resultSet3 = testUtil.getTmOneQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        resultSet3.next();
+        assertEquals(3, resultSet3.getInt("total"));
+
+        ResultSet resultSet4 = testUtil.getTmTwoQueryResult("select * from studenci where wydzial='imir'");
+        assertFalse(resultSet4.next());
+
+        ResultSet resultSet5 = testUtil.getTmOneQueryResult("select * from zamowienia where idzamowienia=17;");
+        assertTrue(resultSet5.next());
+
+
+    }
+
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {
         ResultSet resultSet = testUtil.getTmOneQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dalka' AND miejscowosc='Krakow' AND telefon='666 666 666';");
         assertTrue(resultSet.next());
@@ -398,4 +460,75 @@ public class MainTest {
                 " OR wydzial='EXCEPTION THROWN';");
         assertFalse(resultSet12.next());
     }
+
+    private Thread getBothThreadsSuccessfulTestThreadOne() {
+        return new Thread(() -> transactionService
+                    .newTransaction()
+                .and()
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='trans2 update successful';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, "update studenci set nazwa='update successful' where wydzial='ieit';")
+                .and()
+                    .commit()
+        );
+    }
+
+    private Thread getBothThreadsSuccessfulTestThreadTwo() {
+        return new Thread( () -> transactionService
+                    .newTransaction()
+                .and()
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='ieit';")
+                .and()
+                    .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');")
+                .and()
+                    .commit()
+        );
+    }
+
+    private Thread getMixedThreadsTestFailingThread() {
+        return new Thread( () -> transactionService
+                    .newTransaction()
+                .and()
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='rollback';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, "insert into studenci values" +
+                        "  ('EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN', 'EXCEPTION THROWN');")
+                .and()
+                    .commit()
+        );
+    }
+
+    private Thread getMixedThreadsTestSuccessfulThread() {
+        return new Thread( () -> transactionService
+                    .newTransaction()
+                .and()
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                    .addStatement(TMTWO_QUALIFIER,"delete from studenci * where wydzial='imir';")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, "insert into oceny values (16, 8, 'Programownie Obiektowe', 4.5);")
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update klienci set nazwa='Lech Balcerowicz' where miejscowosc='Warszawa';")
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "update zamowienia set opis='update successful';")
+                .and()
+                    .addStatement(TMONE_QUALIFIER,"insert into zamowienia values(17, 14, 'another succ');")
+                .and()
+                    .commit()
+        );
+    }
+
+
 }
