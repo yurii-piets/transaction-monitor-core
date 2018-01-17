@@ -75,22 +75,18 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, File file) throws IOException {
-        String query = Files.readAllLines(file.toPath())
+    public And addStatement(String qualifier, Path path) throws IOException {
+        String query = Files.readAllLines(path)
                 .stream()
-                .collect(Collectors.joining());
-        addStatement(qualifier, query);
+                .collect(Collectors.joining("\n"));
 
+        addStatement(qualifier, query);
         return this;
     }
 
     @Override
-    public And addStatement(String qualifier, Path path) throws IOException {
-        String query = Files.readAllLines(path)
-                .stream()
-                .collect(Collectors.joining());
-
-        addStatement(qualifier, query);
+    public And addStatement(String qualifier, File file) throws IOException {
+        addStatement(qualifier, file.toPath());
         return this;
     }
 
@@ -149,7 +145,13 @@ public class TransactionImpl implements Transaction {
     private String filterQuery(String query) {
         String filteredQuery = query
                 .replace("begin;", "")
-                .replace("commit;", "");
+                .replace("BEGIN;", "")
+                .replace("start transaction;", "")
+                .replace("START TRANSACTION;", "")
+                .replace("commit;", "")
+                .replace("COMMIT;", "")
+                .replace("rollback;", "")
+                .replace("ROLLBACK;", "");
 
         if (query.contains("begin;")) {
             logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
