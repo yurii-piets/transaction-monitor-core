@@ -1,4 +1,4 @@
-package integration_test.com.tmc;
+package integration_test.com.tmc.local;
 
 import com.tmc.TMConfig;
 import com.tmc.connection.annotation.DatabaseProperty;
@@ -36,7 +36,7 @@ public class LocalTest {
 
     private static final TransactionService transactionService = TMConfig.boot();
 
-    private final TMTestUtil testUtil = new TMTestUtil();
+    private final LocalTestUtil testUtil = new LocalTestUtil();
 
     public LocalTest() throws URISyntaxException, SQLException {
     }

@@ -1,4 +1,4 @@
-package integration_test.com.tmc;
+package integration_test.com.tmc.remote;
 
 import com.tmc.TMConfig;
 import com.tmc.connection.annotation.DatabaseProperty;
@@ -34,7 +34,7 @@ public class RemoteTest {
 
     private static final TransactionService transactionService = TMConfig.boot();
 
-    private final TMTestUtil testUtil = new TMTestUtil();
+    private final RemoteTestUtil testUtil = new RemoteTestUtil();
 
     public RemoteTest() throws URISyntaxException, SQLException {}
 
