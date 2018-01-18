@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,7 +129,7 @@ public class TransactionImpl implements Transaction {
      */
     private void turnOffAutoCommit(Connection connection) throws SQLAutoCommitException {
         try {
-            if(connection.getAutoCommit()) {
+            if (connection.getAutoCommit()) {
                 connection.setAutoCommit(false);
             }
         } catch (SQLException e) {
@@ -143,25 +144,20 @@ public class TransactionImpl implements Transaction {
      * @return filtered query
      */
     private String filterQuery(String query) {
-        String filteredQuery = query
-                .replace("begin;", "")
-                .replace("BEGIN;", "")
-                .replace("start transaction;", "")
-                .replace("START TRANSACTION;", "")
-                .replace("commit;", "")
-                .replace("COMMIT;", "")
-                .replace("rollback;", "")
-                .replace("ROLLBACK;", "");
+        String FORBIDDEN_STATEMENTS_REGEX = "(?i)\\b" + new ArrayList<String>() {{
+            add("begin;");
+            add("begin transaction;");
+            add("start transaction;");
+            add("commit;");
+            add("commit transaction;");
+            add("rollback;");
+            add("rollback transaction;");
+            add("end;");
+        }}.stream()
+                .map(s -> "(" + s + ")")
+                .collect(Collectors.joining("|"));
 
-        if (query.contains("begin;")) {
-            logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
-        }
-
-        if (query.contains("commit;")) {
-            logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
-        }
-
-        return filteredQuery;
+        return query.replaceAll(FORBIDDEN_STATEMENTS_REGEX, "");
     }
 
     /**
