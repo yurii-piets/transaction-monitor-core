@@ -3,7 +3,6 @@ package com.tmc.transaction.core.impl;
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.exception.SQLAutoCommitException;
 import com.tmc.exception.SQLConnectionException;
-import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
 import com.tmc.transaction.core.def.Transaction;
@@ -18,7 +17,9 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,8 +67,16 @@ public class TransactionImpl implements Transaction {
 
             String filteredQuery = filterQuery(query);
 
-            Command command = new DatabaseCommand(connection, filteredQuery);
-            executor.addCommand(command);
+            Arrays.stream(filteredQuery.split(";"))
+                    .filter(Objects::nonNull)
+                    .filter(statement -> !statement.isEmpty())
+                    .filter(statement -> !statement.matches("^\n*$"))
+                    .map(statement -> statement + ";")
+                    .map(statement -> new DatabaseCommand(connection, statement))
+                    .forEach(executor::addCommand);
+
+//            Command command = new DatabaseCommand(connection, filteredQuery);
+//            executor.addCommand(command);
         } catch (SQLConnectionException e) {
             logger.error("Unexpected: ", e);
         }
