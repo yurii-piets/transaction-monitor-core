@@ -1,23 +1,23 @@
-DROP TABLE IF EXISTS klienci;
-DROP TABLE IF EXISTS zamowienia;
+drop table if exists klienci;
+drop table if exists zamowienia;
 
-START TRANSACTION;
-BEGIN;
+start transaction;
+begin;
 
-CREATE TABLE klienci (
-  idklienta   INTEGER PRIMARY KEY,
-  nazwa       VARCHAR(50) NOT NULL,
-  miejscowosc VARCHAR(15),
-  telefon     VARCHAR(20)
+create table klienci (
+  idklienta   integer primary key,
+  nazwa       varchar(50) not null,
+  miejscowosc varchar(15),
+  telefon     varchar(20)
 );
 
-CREATE TABLE zamowienia (
-  idzamowienia INTEGER PRIMARY KEY,
-  idklienta    INTEGER NOT NULL,
-  opis         VARCHAR(100)
+create table zamowienia (
+  idzamowienia integer primary key,
+  idklienta    integer not null,
+  opis         varchar(100)
 );
 
-INSERT INTO klienci VALUES
+insert into klienci values
   (1, 'Hasko Regina', 'Elblag', '111 222 111'),
   (2, 'Pikowski Stefan', 'Krakow', '012 111 11 11'),
   (3, 'Czarnkowska Dalia', 'Ilawa', '111 222 001'),
@@ -31,7 +31,7 @@ INSERT INTO klienci VALUES
   (14, 'Piotrowska Regina', 'Borki', '123 456 002'),
   (15, 'Miszak Stefan', 'Pomiechowek', '123 456 003');
 
-INSERT INTO zamowienia VALUES
+insert into zamowienia values
   (1, 1, 'talon na balon'),
   (3, 2, 'opis3'),
   (4, 3, 'opis4'),
@@ -47,4 +47,4 @@ INSERT INTO zamowienia VALUES
   (14, 13, 'abc3'),
   (15, 14, 'blabla');
 -- owegie
-COMMIT;
+commit;
