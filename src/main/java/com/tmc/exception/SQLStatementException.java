@@ -1,10 +1,12 @@
 package com.tmc.exception;
 
-public class SQLStatementException extends Exception {
+import java.sql.SQLException;
+
+public class SQLStatementException extends SQLException {
 
     private final static String message = "Statement cannot be retried from current connection";
 
-    public SQLStatementException(Throwable cause) {
+    public SQLStatementException(SQLException cause) {
         super(message, cause);
     }
 }

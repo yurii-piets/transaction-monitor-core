@@ -125,7 +125,7 @@ public class TransactionImpl implements Transaction {
             try {
                 Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.commit();
-            } catch (SQLException | SQLConnectionException e) {
+            } catch (SQLException e) {
                 logger.error("Unexpected: ", e);
             }
         }
