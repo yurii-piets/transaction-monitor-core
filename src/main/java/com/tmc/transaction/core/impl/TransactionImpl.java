@@ -31,6 +31,8 @@ public class TransactionImpl implements Transaction {
 
     private final CommandsExecutor executor;
 
+    private String FORBIDDEN_STATEMENTS_REGEX;
+
     /**
      * Set  qualifiers od databases on which current transaction is performed
      */
@@ -40,6 +42,8 @@ public class TransactionImpl implements Transaction {
                            CommandsExecutor executor) {
         this.connectionService = connectionService;
         this.executor = executor;
+
+        initNotAllowedStatementsRegex();
     }
 
     @Override
@@ -64,7 +68,6 @@ public class TransactionImpl implements Transaction {
     public And addStatement(String qualifier, String query) {
         try {
             Connection connection = connectionService.getConnectionByQualifier(qualifier);
-
             String filteredQuery = filterQuery(query);
 
             Arrays.stream(filteredQuery.split(";"))
@@ -75,8 +78,6 @@ public class TransactionImpl implements Transaction {
                     .map(statement -> new DatabaseCommand(connection, statement))
                     .forEach(executor::addCommand);
 
-//            Command command = new DatabaseCommand(connection, filteredQuery);
-//            executor.addCommand(command);
         } catch (SQLConnectionException e) {
             logger.error("Unexpected: ", e);
         }
@@ -153,7 +154,19 @@ public class TransactionImpl implements Transaction {
      * @return filtered query
      */
     private String filterQuery(String query) {
-        String FORBIDDEN_STATEMENTS_REGEX = "(?i)\\b" + new ArrayList<String>() {{
+        return query.replaceAll(FORBIDDEN_STATEMENTS_REGEX, "");
+    }
+
+    /**
+     * Method that is called when transaction is committed
+     * close opened connection in current transaction
+     */
+    private void finishTransaction() {
+        connectionService.releaseConnections();
+    }
+
+    private void initNotAllowedStatementsRegex() {
+        FORBIDDEN_STATEMENTS_REGEX = "(?i)\\b" + new ArrayList<String>() {{
             add("begin;");
             add("begin transaction;");
             add("start transaction;");
@@ -165,15 +178,5 @@ public class TransactionImpl implements Transaction {
         }}.stream()
                 .map(s -> "(" + s + ")")
                 .collect(Collectors.joining("|"));
-
-        return query.replaceAll(FORBIDDEN_STATEMENTS_REGEX, "");
-    }
-
-    /**
-     * Method that is called when transaction is committed
-     * close opened connection in current transaction
-     */
-    private void finishTransaction() {
-        connectionService.releaseConnections();
     }
 }
