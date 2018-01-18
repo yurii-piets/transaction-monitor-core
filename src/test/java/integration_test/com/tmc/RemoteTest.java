@@ -23,9 +23,9 @@ public class RemoteTest {
     static final String TMTHREE_QUALIFIER = "tmthree";
     static final String TMFOUR_QUALIFIER = "tmfour";
 
-    private final Path pathInit = Paths.get(getClass().getClassLoader().getResource("sql/mysql/init_db.sql").toURI());
-    private final Path pathCommit = Paths.get(getClass().getClassLoader().getResource("sql/mysql/commit_db.sql").toURI());
-    private final Path pathRollback = Paths.get(getClass().getClassLoader().getResource("sql/mysql/rollback_db.sql").toURI());
+    private final Path pathInit = Paths.get(getClass().getClassLoader().getResource("sql/ms-azure/init_db.sql").toURI());
+    private final Path pathCommit = Paths.get(getClass().getClassLoader().getResource("sql/ms-azure/commit_db.sql").toURI());
+    private final Path pathRollback = Paths.get(getClass().getClassLoader().getResource("sql/ms-azure/rollback_db.sql").toURI());
 
     private static final TransactionService transactionService = TMConfig.boot();
 
@@ -37,9 +37,9 @@ public class RemoteTest {
     public void before() throws IOException {
         transactionService.newTransaction()
             .and()
-                .begin(TMTHREE_QUALIFIER)
+                .begin(TMFOUR_QUALIFIER)
             .and()
-                .addStatement(TMTHREE_QUALIFIER, pathInit)
+                .addStatement(TMFOUR_QUALIFIER, pathInit)
             .and()
                 .commit();
     }
@@ -51,21 +51,21 @@ public class RemoteTest {
         String deleteQueryTmThree = "delete from klienci";
 
         Transaction transaction = transactionService.newTransaction();
-        transaction.begin(TMTHREE_QUALIFIER);
+        transaction.begin(TMFOUR_QUALIFIER);
 
-        transaction.addStatement(TMTHREE_QUALIFIER, insertQueryTmThree);
+        transaction.addStatement(TMFOUR_QUALIFIER, insertQueryTmThree);
 
-        transaction.addStatement(TMTHREE_QUALIFIER, updateQueryTmThree);
+        transaction.addStatement(TMFOUR_QUALIFIER, updateQueryTmThree);
 
-        transaction.addStatement(TMTHREE_QUALIFIER, deleteQueryTmThree);
+        transaction.addStatement(TMFOUR_QUALIFIER, deleteQueryTmThree);
 
         transaction.commit();
 
-        ResultSet resultSet = testUtil.getTmThreeQueryResult(
+        ResultSet resultSet = testUtil.getTmFourQueryResult(
                 "SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
         assertTrue(resultSet.next());
 
-        ResultSet resultSet2 = testUtil.getTmThreeQueryResult("SELECT * FROM klienci;");
+        ResultSet resultSet2 = testUtil.getTmFourQueryResult("SELECT * FROM klienci;");
         assertFalse(resultSet2.next());
     }
 

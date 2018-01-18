@@ -1,8 +1,7 @@
 drop table if exists klienci;
 drop table if exists zamowienia;
 
-start transaction;
-begin;
+begin transaction;
 
 create table klienci (
   idklienta   integer primary key,
@@ -47,4 +46,4 @@ insert into zamowienia values
   (14, 13, 'abc3'),
   (15, 14, 'blabla');
 -- owegie
-commit;
+commit transaction;
