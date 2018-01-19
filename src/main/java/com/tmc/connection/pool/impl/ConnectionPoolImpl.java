@@ -81,7 +81,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
     @Override
     public void release(Connection connection) {
         try {
-            connection.commit();
+            connection.rollback();
         } catch (SQLException e) {
             logger.warn("Connection cannot be released, connection will be closed.", connection);
             destroyConnection(connection);
@@ -104,6 +104,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
         } catch (SQLException e) {
             logger.error("Unexpected: ", e);
         }
+
         String qualifier = getQualifierByConnection(connection);
         if (qualifier != null) {
             removeAcquired(qualifier, connection);
@@ -121,8 +122,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             throw new IllegalArgumentException("No database source can be accessed via qualifier \"" + qualifier + "\"");
         }
 
-        Connection connection = createConnectionWithAttempts(dataSource);
-        return connection;
+        return createConnectionWithAttempts(dataSource);
     }
 
     private Connection createConnectionWithAttempts(DataSource dataSource) throws SQLConnectionException {
@@ -138,16 +138,6 @@ public class ConnectionPoolImpl implements ConnectionPool {
                 }
             }
         }
-        return connection;
-    }
-
-    private Connection getConnectionByQualifier(String qualifier) {
-        Queue<Connection> connections = available.get(qualifier);
-        if (connections == null) {
-            return null;
-        }
-
-        Connection connection = connections.poll();
         return connection;
     }
 
