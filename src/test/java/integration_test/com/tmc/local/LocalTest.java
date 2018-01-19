@@ -38,8 +38,7 @@ public class LocalTest {
 
     private final LocalTestUtil testUtil = new LocalTestUtil();
 
-    public LocalTest() throws URISyntaxException, SQLException {
-    }
+    public LocalTest() throws URISyntaxException, SQLException {}
 
     @Before
     public void initDB() throws IOException {
