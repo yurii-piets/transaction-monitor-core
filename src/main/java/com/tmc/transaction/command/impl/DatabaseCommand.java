@@ -6,8 +6,6 @@ import com.tmc.exception.SQLSavepointCreationException;
 import com.tmc.exception.SQLStatementException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -21,8 +19,6 @@ import java.sql.Statement;
  * @see Command
  * @see RevertibleCommand
  */
-@Data
-@AllArgsConstructor
 @RequiredArgsConstructor
 public class DatabaseCommand implements RevertibleCommand {
 

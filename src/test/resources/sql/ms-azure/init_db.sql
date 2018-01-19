@@ -45,5 +45,5 @@ insert into zamowienia values
   (13, 12, 'blabla'),
   (14, 13, 'abc3'),
   (15, 14, 'blabla');
--- owegie
+
 commit transaction;
