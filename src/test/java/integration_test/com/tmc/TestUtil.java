@@ -10,15 +10,16 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import static integration_test.com.tmc.ConnectionProperties.*;
+import static integration_test.com.tmc.DatabaseProperties.*;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.*;
 
-public class TestUtil {
+class TestUtil {
 
     private Map<String, DataSource> dataSources = new HashMap<>();
 
     private Map<String, Connection> connections = new HashMap<>();
 
-    public ResultSet resultSetForSqlQuery(String qualifier, String sql) throws SQLException {
+    ResultSet resultSetForSqlQuery(String qualifier, String sql) throws SQLException {
         Connection connection = connection(qualifier);
 
         Statement statement = connection.createStatement();

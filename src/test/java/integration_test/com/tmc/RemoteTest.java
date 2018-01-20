@@ -14,9 +14,9 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static integration_test.com.tmc.ConnectionProperties.PROPERTY_SOURCE_FILE_NAME;
-import static integration_test.com.tmc.ConnectionProperties.TMFOUR_QUALIFIER;
-import static integration_test.com.tmc.ConnectionProperties.TMTHREE_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.PROPERTY_SOURCE_FILE_NAME;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMFOUR_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMTHREE_QUALIFIER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 @DatabaseProperty(path = PROPERTY_SOURCE_FILE_NAME, qualifiers = {TMTHREE_QUALIFIER, TMFOUR_QUALIFIER})
 public class RemoteTest {
+
     private final Path pathInit3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/init_db.sql").toURI());
     private final Path pathCommit3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/commit_db.sql").toURI());
     private final Path pathRollback3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/rollback_db.sql").toURI());

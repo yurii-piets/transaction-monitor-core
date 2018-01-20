@@ -14,9 +14,9 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static integration_test.com.tmc.ConnectionProperties.PROPERTY_SOURCE_FILE_NAME;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_QUALIFIER;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.PROPERTY_SOURCE_FILE_NAME;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMONE_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMTWO_QUALIFIER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
