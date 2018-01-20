@@ -1,4 +1,4 @@
-package integration_test.com.tmc.remote;
+package integration_test.com.tmc;
 
 import com.tmc.TMConfig;
 import com.tmc.connection.annotation.DatabaseProperty;
@@ -14,12 +14,13 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static integration_test.com.tmc.ConnectionProperties.PROPERTY_SOURCE_FILE_NAME;
+import static integration_test.com.tmc.ConnectionProperties.TMFOUR_QUALIFIER;
+import static integration_test.com.tmc.ConnectionProperties.TMTHREE_QUALIFIER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-
-import static integration_test.com.tmc.ConnectionProperties.*;
 
 @DatabaseProperty(path = PROPERTY_SOURCE_FILE_NAME, qualifiers = {TMTHREE_QUALIFIER, TMFOUR_QUALIFIER})
 public class RemoteTest {
@@ -33,7 +34,7 @@ public class RemoteTest {
 
     private static final TransactionService transactionService = TMConfig.boot();
 
-    private final RemoteTestUtil testUtil = new RemoteTestUtil();
+    private final TestUtil testUtil = new TestUtil();
 
     public RemoteTest() throws URISyntaxException, SQLException {}
 
@@ -75,22 +76,22 @@ public class RemoteTest {
 
         transaction.commit();
 
-        ResultSet resultSet = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
+        ResultSet resultSet = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
         assertTrue(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmThreeQueryResult("SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='insert successful' AND ocena='4.5';");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='insert successful' AND ocena='4.5';");
         assertTrue(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmFourQueryResult("SELECT * FROM klienci;");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci;");
         assertFalse(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmThreeQueryResult("SELECT * FROM oceny WHERE przedmiot like 'Fizyka%';");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM oceny WHERE przedmiot like 'Fizyka%';");
 
         while (resultSet3.next()) {
             assertEquals(6.0, resultSet3.getDouble("ocena"), 0.1);
         }
 
-        ResultSet resultSet4 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci WHERE wydzial='imir';");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci WHERE wydzial='imir';");
         assertFalse(resultSet4.next());
     }
 
@@ -205,24 +206,24 @@ public class RemoteTest {
 
         transaction2.commit();
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("select * from klienci where idklienta=77");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from klienci where idklienta=77");
         assertFalse(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmThreeQueryResult("select * from studenci where idstudenta=7");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER, "select * from studenci where idstudenta=7");
         assertTrue(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmThreeQueryResult("select * from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;");
         assertFalse(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmFourQueryResult("select * from zamowienia where idzamowienia=16;");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=16;");
         assertTrue(resultSet4.next());
 
         transaction1.commit();
 
-        ResultSet resultSet5 = testUtil.getTmFourQueryResult("select * from klienci where idklienta=77");
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from klienci where idklienta=77");
         assertFalse(resultSet5.next());
 
-        ResultSet resultSet6 = testUtil.getTmThreeQueryResult("select * from studenci where idstudenta=7");
+        ResultSet resultSet6 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from studenci where idstudenta=7");
         assertTrue(resultSet6.next());
     }
 
@@ -242,38 +243,38 @@ public class RemoteTest {
 
         transaction1.commit();
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select count(*) as total from zamowienia where opis='update successful'");
         resultSet1.next();
         assertEquals(14, resultSet1.getInt("total"));
 
-        ResultSet resultSet2 = testUtil.getTmThreeQueryResult("select nazwa from studenci where wydzial='ieit';");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select nazwa from studenci where wydzial='ieit';");
         while (resultSet2.next()){
             assertEquals("update successful", resultSet2.getString("nazwa"));
         }
 
-        ResultSet resultSet3 = testUtil.getTmFourQueryResult("select * from zamowienia where idzamowienia=16;");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=16;");
         assertFalse(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmThreeQueryResult("select ocena from oceny where przedmiot like 'Fizyka%'");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select ocena from oceny where przedmiot like 'Fizyka%'");
         while(resultSet4.next()){
             assertNotEquals(1.0, resultSet4.getDouble("ocena"), 0.1);
         }
 
         transaction2.commit();
 
-        ResultSet resultSet5 = testUtil.getTmFourQueryResult("select count(*) as total from zamowienia where opis='update successful'");
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select count(*) as total from zamowienia where opis='update successful'");
         resultSet5.next();
         assertEquals(14, resultSet5.getInt("total"));
 
-        ResultSet resultSet6 = testUtil.getTmThreeQueryResult("select nazwa from studenci where wydzial='ieit';");
+        ResultSet resultSet6 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select nazwa from studenci where wydzial='ieit';");
         while (resultSet6.next()){
             assertEquals("update successful", resultSet6.getString("nazwa"));
         }
 
-        ResultSet resultSet7 = testUtil.getTmFourQueryResult("select * from zamowienia where idzamowienia=16;");
+        ResultSet resultSet7 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=16;");
         assertTrue(resultSet7.next());
 
-        ResultSet resultSet8 = testUtil.getTmThreeQueryResult("select ocena from oceny where przedmiot like 'Fizyka%'");
+        ResultSet resultSet8 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select ocena from oceny where przedmiot like 'Fizyka%'");
         while(resultSet8.next()){
             assertEquals(1.0, resultSet8.getInt("ocena"), 0.1);
         }
@@ -290,23 +291,23 @@ public class RemoteTest {
         thread1.join();
         thread2.join();
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("select * from zamowienia where opis='update successful'");
-        ResultSet resultSet2 = testUtil.getTmFourQueryResult("select * from zamowienia where opis='trans2 update successful'");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where opis='update successful'");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where opis='trans2 update successful'");
         assertTrue(resultSet1.next() || resultSet2.next() );
 
-        ResultSet resultSet3 = testUtil.getTmThreeQueryResult("select * from oceny where idoceny=16");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from oceny where idoceny=16");
         assertTrue(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmFourQueryResult("select * from zamowienia where idzamowienia=17;");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=17;");
         assertTrue(resultSet4.next());
 
-        ResultSet resultSet5 = testUtil.getTmThreeQueryResult("select * from studenci where nazwa='update successful'");
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from studenci where nazwa='update successful'");
         assertFalse(resultSet5.next());
 
-        ResultSet resultSet6 = testUtil.getTmThreeQueryResult("select * from studenci where wydzial='ieit'");
+        ResultSet resultSet6 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from studenci where wydzial='ieit'");
         assertFalse(resultSet6.next());
 
-        ResultSet resultSet7 = testUtil.getTmFourQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        ResultSet resultSet7 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
         resultSet7.next();
         assertEquals(3, resultSet7.getInt("total"));
     }
@@ -322,73 +323,73 @@ public class RemoteTest {
         thread1.join();
         thread2.join();
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("select * from zamowienia where opis='update successful'");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where opis='update successful'");
         assertTrue(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmThreeQueryResult("select * from oceny where idoceny=16");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from oceny where idoceny=16");
         assertTrue(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmFourQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz'");
         resultSet3.next();
         assertEquals(3, resultSet3.getInt("total"));
 
-        ResultSet resultSet4 = testUtil.getTmThreeQueryResult("select * from studenci where wydzial='imir'");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"select * from studenci where wydzial='imir'");
         assertFalse(resultSet4.next());
 
-        ResultSet resultSet5 = testUtil.getTmFourQueryResult("select * from zamowienia where idzamowienia=17;");
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=17;");
         assertTrue(resultSet5.next());
 
 
     }
 
     private void assertSuccessfulQueriesOnTmThree() throws SQLException {
-        ResultSet resultSet = testUtil.getTmThreeQueryResult("SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='Programownie Obiektowe' AND ocena=4.5;");
+        ResultSet resultSet = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM oceny WHERE idoceny=16 AND idstudenta=8 AND przedmiot='Programownie Obiektowe' AND ocena=4.5;");
         assertTrue(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmThreeQueryResult("SELECT * FROM oceny WHERE przedmiot LIKE 'Fizyka%';");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM oceny WHERE przedmiot LIKE 'Fizyka%';");
         while (resultSet1.next()) {
             assertEquals(2.0, resultSet1.getDouble("ocena"), 0.1);
         }
 
-        ResultSet resultSet2 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci WHERE wydzial='imir';");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci WHERE wydzial='imir';");
         assertFalse(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci WHERE wydzial='ieit';");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci WHERE wydzial='ieit';");
         while (resultSet.next()) {
             assertEquals("update successful", resultSet3.getString("nazwa"));
         }
     }
 
     private void assertSuccessfulQueriesOnTmFour() throws SQLException {
-        ResultSet resultSet = testUtil.getTmFourQueryResult("SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dalka' AND miejscowosc='Krakow' AND telefon='666 666 666';");
+        ResultSet resultSet = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci WHERE idklienta=16 AND nazwa='Pariusz Dalka' AND miejscowosc='Krakow' AND telefon='666 666 666';");
         assertTrue(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("SELECT * FROM klienci WHERE idklienta=23 AND nazwa='Rollback Successful' AND miejscowosc='PSQL' AND telefon='010 001 100';");
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci WHERE idklienta=23 AND nazwa='Rollback Successful' AND miejscowosc='PSQL' AND telefon='010 001 100';");
         assertTrue(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmFourQueryResult("SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz';");
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT COUNT(*) AS total FROM klienci WHERE nazwa='Lech Balcerowicz';");
         resultSet2.next();
         assertEquals(3, resultSet2.getInt("total"));
 
-        ResultSet resultSet3 = testUtil.getTmFourQueryResult("SELECT * FROM klienci WHERE miejscowosc='Warszawa';");
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci WHERE miejscowosc='Warszawa';");
         while (resultSet3.next()) {
             assertEquals("Lech Balcerowicz", resultSet3.getString("nazwa"));
         }
 
-        ResultSet resultSet4 = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia WHERE idzamowienia!=16;");
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia WHERE idzamowienia!=16;");
         while (resultSet4.next()) {
             assertEquals("update successful", resultSet4.getString("opis"));
         }
 
-        ResultSet resultSet5 = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia WHERE idzamowienia=16 AND idklienta=15 AND opis='insert successful';");
         assertTrue(resultSet5.next());
     }
 
     private void assertFailedQueriesOnTmThree() throws SQLException {
-        ResultSet resultSet8 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci WHERE nazwa='rollback failed'");
+        ResultSet resultSet8 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci WHERE nazwa='rollback failed'");
         assertFalse(resultSet8.next());
 
-        ResultSet resultSet9 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci" +
+        ResultSet resultSet9 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci" +
                 " WHERE idstudenta='20'" +
                 " OR nazwa='Should Not Exist'" +
                 " OR wydzial='human'" +
@@ -396,61 +397,61 @@ public class RemoteTest {
         assertFalse(resultSet9.next());
 
 
-        ResultSet resultSet10 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci" +
+        ResultSet resultSet10 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci" +
                 " WHERE idstudenta=21" +
                 " OR nazwa='Should Not Exist'" +
                 " OR wydzial='human'" +
                 " OR wiek=5.5;");
         assertFalse(resultSet10.next());
 
-        ResultSet resultSet11 = testUtil.getTmThreeQueryResult("SELECT COUNT(*) AS total FROM studenci WHERE wydzial='eaiiib';");
+        ResultSet resultSet11 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT COUNT(*) AS total FROM studenci WHERE wydzial='eaiiib';");
         resultSet11.next();
         assertEquals(5, resultSet11.getInt("total"));
 
-        ResultSet resultSet12 = testUtil.getTmThreeQueryResult("SELECT * FROM studenci " +
+        ResultSet resultSet12 = testUtil.resultSetForSqlQuery(TMTHREE_QUALIFIER,"SELECT * FROM studenci " +
                 " WHERE nazwa='EXCEPTION THROWN'" +
                 " OR wydzial='EXCEPTION THROWN';");
         assertFalse(resultSet12.next());
     }
 
     private void assertFailedQueriesOnTmFour() throws SQLException {
-        ResultSet resultSet = testUtil.getTmFourQueryResult("SELECT * FROM klienci WHERE nazwa='Rollback Failed'");
+        ResultSet resultSet = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci WHERE nazwa='Rollback Failed'");
         assertFalse(resultSet.next());
 
-        ResultSet resultSet1 = testUtil.getTmFourQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet1 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci " +
                 " WHERE idklienta=20" +
                 " OR nazwa='Successful Rollback Commit'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='404 404 404';");
         assertFalse(resultSet1.next());
 
-        ResultSet resultSet2 = testUtil.getTmFourQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci " +
                 " WHERE idklienta=21" +
                 " OR nazwa='Another Successful Commit'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='403 403 403';");
         assertFalse(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.getTmFourQueryResult("SELECT * FROM klienci " +
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM klienci " +
                 " WHERE idklienta=22" +
                 " OR nazwa='Yet Another Working Insert'" +
                 " OR miejscowosc='PSQL'" +
                 " OR telefon='402 402 402';");
         assertFalse(resultSet3.next());
 
-        ResultSet resultSet4 = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet4 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=16" +
                 " OR idklienta=20" +
                 " OR opis='Stop inserting!';");
         assertFalse(resultSet4.next());
 
-        ResultSet resultSet5 = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=17" +
                 " OR idklienta=21" +
                 " OR opis='9/11 was an inside job';");
         assertFalse(resultSet5.next());
 
-        ResultSet resultSet6 = testUtil.getTmFourQueryResult("SELECT * FROM zamowienia " +
+        ResultSet resultSet6 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "SELECT * FROM zamowienia " +
                 " WHERE idzamowienia=18" +
                 " OR idklienta=22" +
                 " OR opis='¯\\_(ツ)_/¯';");

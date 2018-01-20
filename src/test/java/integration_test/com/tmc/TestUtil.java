@@ -10,22 +10,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import static integration_test.com.tmc.ConnectionProperties.TMFOUR_DRIVER;
-import static integration_test.com.tmc.ConnectionProperties.TMFOUR_URL;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_DRIVER;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_PASSWORD;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_QUALIFIER;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_URL;
-import static integration_test.com.tmc.ConnectionProperties.TMONE_USER;
-import static integration_test.com.tmc.ConnectionProperties.TMTHREE_DRIVER;
-import static integration_test.com.tmc.ConnectionProperties.TMTHREE_PASSWORD;
-import static integration_test.com.tmc.ConnectionProperties.TMTHREE_URL;
-import static integration_test.com.tmc.ConnectionProperties.TMTHREE_USER;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_DRIVER;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_PASSWORD;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_QUALIFIER;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_URL;
-import static integration_test.com.tmc.ConnectionProperties.TMTWO_USER;
+import static integration_test.com.tmc.ConnectionProperties.*;
 
 public class TestUtil {
 
@@ -71,14 +56,14 @@ public class TestUtil {
             case TMTWO_QUALIFIER:
                 return dataSourceTmtwo();
 
-            case TMTHREE_DRIVER:
+            case TMTHREE_QUALIFIER:
                 return dataSourceTmthree();
 
-            case TMFOUR_DRIVER:
+            case TMFOUR_QUALIFIER:
                 return dataSourceTmfour();
 
             default:
-                throw new IllegalStateException("Unknown database qualifier.");
+                throw new IllegalStateException("Unknown database qualifier:{ " + qualifier + " }");
         }
     }
 
