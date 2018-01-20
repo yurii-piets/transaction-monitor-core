@@ -41,15 +41,7 @@ public class RemoteTest {
 
     @Before
     public void before() throws IOException {
-        transactionService.newTransaction()
-            .and()
-                .begin(TMTHREE_QUALIFIER, TMFOUR_QUALIFIER)
-            .and()
-                .addStatement(TMTHREE_QUALIFIER, pathInit3)
-            .and()
-                .addStatement(TMFOUR_QUALIFIER, pathInit4)
-            .and()
-                .commit();
+        initDatabases();
     }
 
     @Test
@@ -339,8 +331,18 @@ public class RemoteTest {
 
         ResultSet resultSet5 = testUtil.resultSetForSqlQuery(TMFOUR_QUALIFIER, "select * from zamowienia where idzamowienia=17;");
         assertTrue(resultSet5.next());
+    }
 
-
+    private void initDatabases() throws IOException {
+        transactionService.newTransaction()
+            .and()
+                .begin(TMTHREE_QUALIFIER, TMFOUR_QUALIFIER)
+            .and()
+                .addStatement(TMTHREE_QUALIFIER, pathInit3)
+            .and()
+                .addStatement(TMFOUR_QUALIFIER, pathInit4)
+            .and()
+                .commit();
     }
 
     private void assertSuccessfulQueriesOnTmThree() throws SQLException {

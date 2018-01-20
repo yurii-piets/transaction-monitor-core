@@ -41,16 +41,8 @@ public class LocalTest {
     public LocalTest() throws URISyntaxException {}
 
     @Before
-    public void initDB() throws IOException {
-        transactionService.newTransaction()
-            .and()
-                .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
-            .and()
-                .addStatement(TMONE_QUALIFIER, pathInit1)
-            .and()
-                .addStatement(TMTWO_QUALIFIER, pathInit2)
-            .and()
-                .commit();
+    public void before() throws IOException {
+        initDatabases();
     }
 
     @Test
@@ -218,7 +210,7 @@ public class LocalTest {
         ResultSet resultSet2 = testUtil.resultSetForSqlQuery(TMTWO_QUALIFIER, "select * from studenci where idstudenta=7");
         assertTrue(resultSet2.next());
 
-        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTWO_QUALIFIER, 
+        ResultSet resultSet3 = testUtil.resultSetForSqlQuery(TMTWO_QUALIFIER,
                 "select * from oceny where przedmiot='Podstawy Elektroniki Cyfrowej' and idstudenta=8;");
         assertFalse(resultSet3.next());
 
@@ -347,6 +339,18 @@ public class LocalTest {
         assertTrue(resultSet5.next());
 
 
+    }
+
+    private void initDatabases() throws IOException {
+        transactionService.newTransaction()
+            .and()
+                .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+            .and()
+                .addStatement(TMONE_QUALIFIER, pathInit1)
+            .and()
+                .addStatement(TMTWO_QUALIFIER, pathInit2)
+            .and()
+                .commit();
     }
 
     private void assertSuccessfulQueriesOnTmOne() throws SQLException {
