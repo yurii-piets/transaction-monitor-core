@@ -46,11 +46,7 @@ final class TestUtil {
         Connection connection = connection(qualifier);
 
         Statement statement = connection.createStatement();
-        if (statement != null) {
-            return statement.executeQuery(sql);
-        }
-
-        return null;
+        return statement.executeQuery(sql);
     }
 
     private Connection connection(String qualifier) throws SQLException {
@@ -69,7 +65,7 @@ final class TestUtil {
     }
 
     private DataSource dataSource(String qualifier) {
-        return dataSources.computeIfAbsent(qualifier, s -> createDataSource(qualifier));
+        return dataSources.computeIfAbsent(qualifier, this::createDataSource);
     }
 
     private DataSource createDataSource(String qualifier) {
