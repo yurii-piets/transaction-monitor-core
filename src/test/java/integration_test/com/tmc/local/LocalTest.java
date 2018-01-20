@@ -14,16 +14,14 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static integration_test.com.tmc.ConnectionProperties.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-@DatabaseProperty(path = LocalTest.PROPERTY_SOURCE_FILE_NAME, qualifiers = {LocalTest.TMONE_QUALIFIER, LocalTest.TMTWO_QUALIFIER})
+@DatabaseProperty(path = PROPERTY_SOURCE_FILE_NAME, qualifiers = {TMONE_QUALIFIER, TMTWO_QUALIFIER})
 public class LocalTest {
-    final static String PROPERTY_SOURCE_FILE_NAME = "test.properties";
-    final static String TMONE_QUALIFIER = "tmone";
-    final static String TMTWO_QUALIFIER = "tmtwo";
 
     private final Path pathInit1 = Paths.get(getClass().getClassLoader().getResource("sql/psql/init_db1.sql").toURI());
     private final Path pathInit2 = Paths.get(getClass().getClassLoader().getResource("sql/psql/init_db2.sql").toURI());
@@ -34,7 +32,7 @@ public class LocalTest {
     private final Path pathRollback1 = Paths.get(getClass().getClassLoader().getResource("sql/psql/rollback_db1.sql").toURI());
     private final Path pathRollback2 = Paths.get(getClass().getClassLoader().getResource("sql/psql/rollback_db2.sql").toURI());
 
-    private static final TransactionService transactionService = TMConfig.boot();
+    private final TransactionService transactionService = TMConfig.boot();
 
     private final LocalTestUtil testUtil = new LocalTestUtil();
 

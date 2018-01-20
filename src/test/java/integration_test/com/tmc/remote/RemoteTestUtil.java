@@ -8,16 +8,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static integration_test.com.tmc.ConnectionProperties.*;
+
 // TODO: 17/01/2018 refactor current util
 class RemoteTestUtil {
-
-    private static final String TMTHREE_URL = "jdbc:mysql://sql11.freemysqlhosting.net:3306/sql11214352";
-    private static final String TMTHREE_USER = "sql11214352";
-    private static final String TMTHREE_PASSWORD = "4DgP52934w";
-    private static final String TMTHREE_DRIVER = "com.mysql.jdbc.Driver";
-
-    private static final String TMFOUR_URL = "jdbc:sqlserver://omegadb.database.windows.net:1433;database=OmegaDB;user=omega;password=@dmin1234;encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
-    private static final String TMFOUR_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 

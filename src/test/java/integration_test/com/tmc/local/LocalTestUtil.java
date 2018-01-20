@@ -8,18 +8,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-// TODO: 17/01/2018 refactor current util
+import static integration_test.com.tmc.ConnectionProperties.*;
+
 class LocalTestUtil {
-
-    private static final String TMONE_URL = "jdbc:postgresql://localhost:5432/tmone";
-    private static final String TMONE_USER = System.getenv().get("PG_USER");
-    private static final String TMONE_PASSWORD = System.getenv().get("PG_PASSWORD");
-    private static final String TMONE_DRIVER = "org.postgresql.Driver";
-
-    private static final String TMTWO_URL = "jdbc:postgresql://localhost:5432/tmtwo";
-    private static final String TMTWO_USER = System.getenv().get("PG_USER");
-    private static final String TMTWO_PASSWORD = System.getenv().get("PG_PASSWORD");
-    private static final String TMTWO_DRIVER = "org.postgresql.Driver";
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 

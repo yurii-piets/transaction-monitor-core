@@ -19,12 +19,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-@DatabaseProperty(path = RemoteTest.PROPERTY_SOURCE_FILE_NAME, qualifiers = {RemoteTest.TMTHREE_QUALIFIER, RemoteTest.TMFOUR_QUALIFIER})
-public class RemoteTest {
-    static final String PROPERTY_SOURCE_FILE_NAME = "test.properties";
-    static final String TMTHREE_QUALIFIER = "tmthree";
-    static final String TMFOUR_QUALIFIER = "tmfour";
+import static integration_test.com.tmc.ConnectionProperties.*;
 
+@DatabaseProperty(path = PROPERTY_SOURCE_FILE_NAME, qualifiers = {TMTHREE_QUALIFIER, TMFOUR_QUALIFIER})
+public class RemoteTest {
     private final Path pathInit3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/init_db.sql").toURI());
     private final Path pathCommit3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/commit_db.sql").toURI());
     private final Path pathRollback3 = Paths.get(getClass().getClassLoader().getResource("sql/mysql/rollback_db.sql").toURI());
