@@ -1,5 +1,8 @@
 package integration_test.com.tmc;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
@@ -10,14 +13,34 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import static integration_test.com.tmc.DatabaseProperties.*;
-import static integration_test.com.tmc.DatabaseProperties.Qualifiers.*;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMFOUR_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMONE_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMTHREE_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.Qualifiers.TMTWO_QUALIFIER;
+import static integration_test.com.tmc.DatabaseProperties.TMFOUR_DRIVER;
+import static integration_test.com.tmc.DatabaseProperties.TMFOUR_URL;
+import static integration_test.com.tmc.DatabaseProperties.TMONE_DRIVER;
+import static integration_test.com.tmc.DatabaseProperties.TMONE_PASSWORD;
+import static integration_test.com.tmc.DatabaseProperties.TMONE_URL;
+import static integration_test.com.tmc.DatabaseProperties.TMONE_USER;
+import static integration_test.com.tmc.DatabaseProperties.TMTHREE_DRIVER;
+import static integration_test.com.tmc.DatabaseProperties.TMTHREE_PASSWORD;
+import static integration_test.com.tmc.DatabaseProperties.TMTHREE_URL;
+import static integration_test.com.tmc.DatabaseProperties.TMTHREE_USER;
+import static integration_test.com.tmc.DatabaseProperties.TMTWO_DRIVER;
+import static integration_test.com.tmc.DatabaseProperties.TMTWO_PASSWORD;
+import static integration_test.com.tmc.DatabaseProperties.TMTWO_URL;
+import static integration_test.com.tmc.DatabaseProperties.TMTWO_USER;
 
-class TestUtil {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+final class TestUtil {
 
-    private Map<String, DataSource> dataSources = new HashMap<>();
+    @Getter
+    private final static TestUtil instance = new TestUtil();
 
-    private Map<String, Connection> connections = new HashMap<>();
+    private final Map<String, DataSource> dataSources = new HashMap<>();
+
+    private final Map<String, Connection> connections = new HashMap<>();
 
     ResultSet resultSetForSqlQuery(String qualifier, String sql) throws SQLException {
         Connection connection = connection(qualifier);
@@ -67,7 +90,6 @@ class TestUtil {
                 throw new IllegalStateException("Unknown database qualifier:{ " + qualifier + " }");
         }
     }
-
 
     private DataSource dataSourceTmone() {
         BasicDataSource dataSource = new BasicDataSource();

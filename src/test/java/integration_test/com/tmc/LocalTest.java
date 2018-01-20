@@ -36,7 +36,7 @@ public class LocalTest {
 
     private final TransactionService transactionService = TMConfig.boot();
 
-    private final TestUtil testUtil = new TestUtil();
+    private final TestUtil testUtil = TestUtil.getInstance();
 
     public LocalTest() throws URISyntaxException {}
 

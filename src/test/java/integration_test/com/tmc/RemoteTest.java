@@ -35,7 +35,7 @@ public class RemoteTest {
 
     private static final TransactionService transactionService = TMConfig.boot();
 
-    private final TestUtil testUtil = new TestUtil();
+    private final TestUtil testUtil = TestUtil.getInstance();
 
     public RemoteTest() throws URISyntaxException, SQLException {}
 
