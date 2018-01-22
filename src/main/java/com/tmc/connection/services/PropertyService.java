@@ -30,7 +30,7 @@ public class PropertyService {
 
     private Set<Properties> properties;
 
-    private final static String ENVIRONMENTAL_VARIABLE_PATTERN = "^(\\$\\{).*(\\})$";
+    private final static String ENVIRONMENTAL_VARIABLE_PATTERN = "^(\\$\\{).*(})$";
 
     public PropertyService() {
         initQualifiers();
@@ -94,6 +94,7 @@ public class PropertyService {
         for (Properties property : properties) {
             if (property.containsKey(key)) {
                 propertyValue = property.getProperty(key);
+                break;
             }
         }
 

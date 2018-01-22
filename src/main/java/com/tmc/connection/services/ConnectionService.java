@@ -35,8 +35,7 @@ public class ConnectionService {
      */
     public Connection getConnectionByQualifier(String qualifier) throws SQLConnectionException {
         if (cachedConnections.containsKey(qualifier)) {
-            Connection connection = cachedConnections.get(qualifier);
-            return connection;
+            return cachedConnections.get(qualifier);
         }
 
         Connection connection;

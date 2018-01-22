@@ -31,12 +31,10 @@ public final class ApplicationContext {
         databaseConfig();
     }
 
-    private DatabaseConfig databaseConfig() {
+    private void databaseConfig() {
         if (databaseConfig == null) {
             databaseConfig = new DatabaseConfig(dataSources(), propertyService());
         }
-
-        return databaseConfig;
     }
 
     private PropertyService propertyService() {

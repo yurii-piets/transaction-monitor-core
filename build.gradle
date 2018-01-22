@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: "jacoco"
 
 group = 'com.transaction-monitor'
-version = '0.1.4-SNAPSHOT'
+version = '0.1.5-SNAPSHOT'
 
 ext {
     applicationName = 'transaction-monitor-core'
@@ -17,6 +17,16 @@ repositories {
     mavenCentral()
 }
 
+task localTest(type: Test) {
+    group = 'verification'
+    include '**/LocalTest.*'
+}
+
+task remoteTest(type: Test) {
+    group = 'verification'
+    include '**/RemoteTest.*'
+}
+
 dependencies {
     compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
@@ -27,6 +37,6 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.postgresql', name: 'postgresql', version: '42.1.4'
-    testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    testCompile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
     testCompile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.2.1.jre8'
 }
