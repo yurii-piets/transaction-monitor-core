@@ -51,8 +51,8 @@ public class DatabaseConfig {
         BasicDataSource basicDataSource = new BasicDataSource();
 
         basicDataSource.setUrl(propertyService.getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        basicDataSource.setUsername(propertyService.getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        basicDataSource.setPassword(propertyService.getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setUsername(propertyService.getProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setPassword(propertyService.getProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
         basicDataSource.setDriverClassName(propertyService.getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
 
         return basicDataSource;

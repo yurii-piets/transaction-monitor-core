@@ -80,7 +80,7 @@ public class PropertyService {
     }
 
     public String getRequiredProperty(String key) {
-        String property = getPropertyByName(key);
+        String property = getProperty(key);
 
         if (property == null) {
             throw new IllegalStateException("Could not find property with the name: " + key);
@@ -89,7 +89,7 @@ public class PropertyService {
         return property;
     }
 
-    private String getPropertyByName(String key) {
+    public String getProperty(String key) {
         String propertyValue = null;
         for (Properties property : properties) {
             if (property.containsKey(key)) {
