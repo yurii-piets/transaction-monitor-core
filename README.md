@@ -20,6 +20,7 @@ To use Transaction monitor:
     }
     ``` 
 3. Create property file with database parameters. Each parameter must have a prefix that contains database qualifier used in the program. For each parameter that is surrounded ``${...}`` (e.g. ``${PROPERTY_NAME}``) value will be initialized as the same named environmental variable in your system.  
+    
     e.g.
     ```
     tmone.url=jdbc:postgresql://localhost:5432/tmone
@@ -32,7 +33,23 @@ To use Transaction monitor:
     tmtwo.password=${PG_PASSWORD}
     tmtwo.driver-class-name=org.postgresql.Driver
     ```
-    
+4. Put this line were transaction is needed to be performed :``TransactionService transactionService = TMConfig.boot();``.
+Start new transaction by calling: `transactionService.newTransaction()`.
+
+    e.g.
+    ```
+            TransactionService transactionService = TMConfig.boot();
+            
+            transactionService.newTransaction()
+                .and()
+                    .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
+                .and()
+                    .addStatement(TMONE_QUALIFIER, "insert into ...")
+                .and()
+                    .addStatement(TMTWO_QUALIFIER, new File("example.sql"))
+                .and()
+                    .commit();
+    ```
     
 ## Testing ##    
 - To perform local tests (`LocalTest.java`), should be created two local PSQL databases, named `tmone` and `tmtwo`, and all required parameters should be specified in `test.properties` (url,username, password).
