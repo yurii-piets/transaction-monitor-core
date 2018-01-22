@@ -15,9 +15,15 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ApplicationContext {
+/**
+ * Context of application,
+ * is created on TransactionService.boot() first method call
+ */
+final class ApplicationContext {
 
-    private static final ApplicationContext context = new ApplicationContext();
+    private static ApplicationContext context;
+
+    private static TransactionService transactionService;
 
     private DatabaseConfig databaseConfig;
 
@@ -28,15 +34,29 @@ public final class ApplicationContext {
     private Map<String, DataSource> dataSources;
 
     private ApplicationContext() {
+        config();
+    }
+
+    /**
+     * Configs all classes that are needed to be configured on application startup
+     */
+    private void config() {
         databaseConfig();
     }
 
+    /**
+     * Initializes database config class
+     */
     private void databaseConfig() {
         if (databaseConfig == null) {
             databaseConfig = new DatabaseConfig(dataSources(), propertyService());
         }
     }
 
+    /**
+     * @return instance of PropertyService, initializes propertyService in case it it was not
+     * @see PropertyService
+     */
     private PropertyService propertyService() {
         if (propertyService == null) {
             propertyService = new PropertyService();
@@ -45,6 +65,10 @@ public final class ApplicationContext {
         return propertyService;
     }
 
+    /**
+     * @return instance of ConnectionPool, initializes propertyService in case it it was not@return
+     * @see ConnectionPool
+     */
     private ConnectionPool connectionPool() {
         if (connectionPool == null) {
             connectionPool = new ConnectionPoolImpl(dataSources());
@@ -53,14 +77,26 @@ public final class ApplicationContext {
         return connectionPool;
     }
 
+    /**
+     * @return instance of ConnectionService, initializes in case it it was not
+     * @see ConnectionService
+     */
     private ConnectionService connectionService() {
         return new ConnectionService(connectionPool());
     }
 
+    /**
+     * @return instance of CommandsExecutor, initializes in case it it was not
+     * @see CommandsExecutor
+     */
     private CommandsExecutor commandsExecutor() {
         return new DatabaseCommandExecutor();
     }
 
+    /**
+     * @return initialized data sources, initializes in case they were not
+     * @see DataSource
+     */
     private Map<String, DataSource> dataSources() {
         if (dataSources == null) {
             dataSources = new HashMap<>();
@@ -69,10 +105,33 @@ public final class ApplicationContext {
         return dataSources;
     }
 
-    static TransactionService transactionService() {
-        return new TransactionService(context);
+    /**
+     * @return ApplicationContext, initializes whole application context in case it it was not
+     */
+    private static ApplicationContext context() {
+        if (context == null) {
+            context = new ApplicationContext();
+        }
+
+        return context;
     }
 
+    /**
+     * @return instance of TransactionService, initializes in case it it was not
+     * @see TransactionService
+     */
+    static TransactionService transactionService() {
+        if (transactionService == null) {
+            transactionService = new TransactionService(context());
+        }
+
+        return transactionService;
+    }
+
+    /**
+     * @return new instance of transaction for each method call
+     * @see Transaction
+     */
     public Transaction transaction() {
         return new TransactionImpl(connectionService(), commandsExecutor());
     }

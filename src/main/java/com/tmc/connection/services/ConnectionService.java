@@ -45,6 +45,10 @@ public class ConnectionService {
         return connection;
     }
 
+    /**
+     * Release all cached connections back to pool
+     * @see Connection
+     */
     public void releaseConnections() {
         for (Connection connection : cachedConnections.values()) {
             connectionPool.release(connection);
