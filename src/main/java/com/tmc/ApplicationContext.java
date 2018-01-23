@@ -19,7 +19,7 @@ import java.util.Map;
  * Context of application,
  * is created on TransactionService.boot() first method call
  */
-final class ApplicationContext {
+public final class ApplicationContext {
 
     private static ApplicationContext context;
 
