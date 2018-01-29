@@ -1,13 +1,13 @@
 # Transaction monitor #
 
-Applications allows to perform single transaction on several SQL-Databases.
+Application allows to perform single transaction on several SQL-Databases.
 
-To use Transaction monitor:
-1. Add dependency to your project.
-2. Put annotation `@DatabaseProperty` on any of your classes, with initialized two fields:
+# How to use the transaction monitor #
+1. Add a dependency to your project.
+2. Put the annotation `@DatabaseProperty` on any of your classes, with two initialized fields:
     - path - Path to where databases parameters are specified
     - qualifiers - Qualifiers by which databases will be differentiated.
-     
+
     e.g.
     ```
     @DatabaseProperty(path = PROPERTY_SOURCE_FILE_NAME, qualifiers = {TMONE_QUALIFIER, TMTWO_QUALIFIER})
@@ -15,31 +15,31 @@ To use Transaction monitor:
         final static String PROPERTY_SOURCE_FILE_NAME = "test.properties";
         final static String TMONE_QUALIFIER = "tmone";
         final static String TMTWO_QUALIFIER = "tmtwo";
-        
+
         ...
     }
-    ``` 
-3. Create property file with database parameters. Each parameter must have a prefix that contains database qualifier used in the program. For each parameter that is surrounded ``${...}`` (e.g. ``${PROPERTY_NAME}``) value will be initialized as the same named environmental variable in your system.  
-    
+    ```
+3. Create a property file with database parameters. Each parameter must have a prefix that contains a database qualifier used in the program. For each parameter that is surrounded by ``${...}`` (e.g. ``${PROPERTY_NAME}``) the value will be initialized with the value of an environmental variable in your system.
+
     e.g.
     ```
     tmone.url=jdbc:postgresql://localhost:5432/tmone
     tmone.username=${PG_USER}
     tmone.password=${PG_PASSWORD}
     tmone.driver-class-name=org.postgresql.Driver
-                
+
     tmtwo.url=jdbc:postgresql://localhost:5432/tmtwo
     tmtwo.username=${PG_USER}
     tmtwo.password=${PG_PASSWORD}
     tmtwo.driver-class-name=org.postgresql.Driver
     ```
-4. Put this line were transaction is needed to be performed :``TransactionService transactionService = TMConfig.boot();``.
-Start new transaction by calling: `transactionService.newTransaction()`.
+4. Put the following line in where a transaction is needed to be performed :``TransactionService transactionService = TMConfig.boot();``.
+Start a new transaction by calling: `transactionService.newTransaction()`.
 
     e.g.
     ```
             TransactionService transactionService = TMConfig.boot();
-            
+
             transactionService.newTransaction()
                 .and()
                     .begin(TMONE_QUALIFIER, TMTWO_QUALIFIER)
@@ -50,17 +50,17 @@ Start new transaction by calling: `transactionService.newTransaction()`.
                 .and()
                     .commit();
     ```
-    
+
 ## Testing ##    
-- To perform local tests (`LocalTest.java`), should be created two local PSQL databases, named `tmone` and `tmtwo`, and all required parameters should be specified in `test.properties` (url,username, password).
+- To perform the local tests (`LocalTest.java`), two local PSQL databases should be created, named `tmone` and `tmtwo`, and all of the required parameters (url, username, password) should be specified in the `test.properties` file.
 
-- To perform remote tests (`RemoteTest.java`) internet connection is required. On remote host are located **MS Azure** database and **MySql** database.
+- To perform the remote tests (`RemoteTest.java`) internet connection is required. The remote host contains a **MS Azure** database and a **MySql** database.
 
-##Programming patterns ##
+## Programming patterns ##
 Programmings patterns that are used:
 1. Command
-    As ``DatabaseCommnad.java`` to separated each statement added by user to single command that can be executed on specified database.
+    Implemented in ``DatabaseCommand.java`` by separating each statement added by the user to a single command that can be executed on a specified database.
 2. Pool
-    As ``ConnectionPool.java`` to access the database via jdbc connection, that are represented as class, and instances are stored in Connection Pool. Max pool size is 10 connection. If all connection are in use, method call will wait until one of anther connection will be released back to poll.
-3. Unity of Work
-    As ``Transaction.java`` to guarantee all of **ACID** *(Atomicity, Consistency, Isolation, Durability)* principles to be followed. 
+    Implemented in ``ConnectionPool.java`` to access the database via a JDBC connection that is represented as a class, and their particular instances are stored in the Connection Pool. Max pool size is 10 connections. If all connections are in use, the method call will wait until one of the other connections is released back to the pool.
+3. Unit of Work
+    Used in ``Transaction.java`` to guarantee all of **ACID** *(Atomicity, Consistency, Isolation, Durability)* principles to be followed.
