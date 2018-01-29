@@ -5,7 +5,7 @@ import com.tmc.transaction.service.TransactionService;
 public class TMConfig {
 
     /**
-     * @return new instance TransactionService
+     * @return the instance of TransactionService
      * @see TransactionService
      */
     public static TransactionService boot() {

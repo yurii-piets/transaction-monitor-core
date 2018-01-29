@@ -28,8 +28,14 @@ public class PropertyService {
     @Getter
     private Set<String> qualifiers;
 
+    /**
+     * The persistent set of properties.
+     */
     private Set<Properties> properties;
 
+    /**
+     * Regex that matches environmental variable notation e.g ${VARIABLE_NAME}
+     */
     private final static String ENVIRONMENTAL_VARIABLE_PATTERN = "^(\\$\\{).*(})$";
 
     public PropertyService() {
@@ -79,7 +85,14 @@ public class PropertyService {
                 .collect(Collectors.toSet());
     }
 
-    public String getRequiredProperty(String key) {
+
+    /**
+     *
+     * @param key - by this property is found in properties files
+     * @return property value that is specified by key
+     * @throws InterruptedException - in case if property specified by the key does not exist
+     */
+    public String getRequiredProperty(String key) throws IllegalStateException {
         String property = getProperty(key);
 
         if (property == null) {
@@ -89,6 +102,12 @@ public class PropertyService {
         return property;
     }
 
+    /**
+     *
+     * @param key - by this property is found in properties files
+     * @return property value that is specified by key
+     *         or null is property does not exist
+     */
     public String getProperty(String key) {
         String propertyValue = null;
         for (Properties property : properties) {
@@ -105,6 +124,11 @@ public class PropertyService {
         return propertyValue;
     }
 
+    /**
+     *
+     * @param property key to environmental variable
+     * @return value of environmental variable specified by the key
+     */
     private String getEnvironmentalVariable(String property) {
         Map<String, String> environment = System.getenv();
 

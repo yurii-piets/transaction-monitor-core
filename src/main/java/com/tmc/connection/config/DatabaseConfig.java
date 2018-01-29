@@ -17,6 +17,9 @@ public class DatabaseConfig {
     private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
     private final static String QUALIFIER_PATTERN = "{qualifier}";
 
+    /**
+     * Map of DataSource instances that can accessed via database qualifier.
+     */
     private final Map<String, DataSource> dataSources;
 
     private final PropertyService propertyService;

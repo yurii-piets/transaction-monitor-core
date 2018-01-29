@@ -62,29 +62,27 @@ public class DatabaseCommand implements RevertibleCommand {
      */
     @Override
     public void revert() throws SQLRevertException {
-        try {
-            connection.rollback(savepoint);
-        } catch (SQLException e) {
-            throw new SQLRevertException(e);
-        }
+//        try {
+//            connection.rollback(savepoint);
+//        } catch (SQLException e) {
+//            throw new SQLRevertException(e);
+//        }
     }
 
     private void initSavepoint() throws SQLSavepointCreationException {
-        try {
-            savepoint = connection.setSavepoint();
-        } catch (SQLException e) {
-            throw new SQLSavepointCreationException(e);
-        }
+//        try {
+//            savepoint = connection.setSavepoint();
+//        } catch (SQLException e) {
+//            throw new SQLSavepointCreationException(e);
+//        }
     }
 
     private Statement createStatement() throws SQLStatementException {
-        Statement statement;
         try {
-            statement = connection.createStatement();
+            return connection.createStatement();
         } catch (SQLException e) {
             throw new SQLStatementException(e);
         }
-        return statement;
     }
 
     private void executeStatement(Statement statement) throws SQLQueryException {
