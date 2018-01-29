@@ -1,6 +1,6 @@
 # Transaction monitor #
 
-Application allows to perform single transaction on several SQL-Databases.
+Application allows to perform transactions on several SQL-Databases.
 
 # How to use the transaction monitor #
 1. Add a dependency to your project.
@@ -19,7 +19,7 @@ Application allows to perform single transaction on several SQL-Databases.
         ...
     }
     ```
-3. Create a property file with database parameters. Each parameter must have a prefix that contains a database qualifier used in the program. For each parameter that is surrounded by ``${...}`` (e.g. ``${PROPERTY_NAME}``) the value will be initialized with the value of an environmental variable in your system.
+3. Create a property file with database parameters. Each parameter must have a prefix that contains a database qualifier used in the program. For each parameter that is surrounded by ``${...}`` (e.g. ``${PROPERTY_NAME}``) the value will be initialized with the value of an environmental variable of the same name existing in your system.
 
     e.g.
     ```
@@ -33,7 +33,7 @@ Application allows to perform single transaction on several SQL-Databases.
     tmtwo.password=${PG_PASSWORD}
     tmtwo.driver-class-name=org.postgresql.Driver
     ```
-4. Put the following line in where a transaction is needed to be performed :``TransactionService transactionService = TMConfig.boot();``.
+4. Use the following line in where a transaction is needed to be performed :``TransactionService transactionService = TMConfig.boot();``.
 Start a new transaction by calling: `transactionService.newTransaction()`.
 
     e.g.
