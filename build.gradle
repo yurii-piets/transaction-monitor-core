@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: "jacoco"
 
 group = 'com.transaction-monitor'
-version = '0.1.6-SNAPSHOT'
+version = '1.0.0-RELEASE'
 
 ext {
     applicationName = 'transaction-monitor-core'
