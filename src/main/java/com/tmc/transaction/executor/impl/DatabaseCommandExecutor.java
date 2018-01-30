@@ -55,7 +55,7 @@ public class DatabaseCommandExecutor implements CommandsExecutor {
             if (command instanceof RevertibleCommand) {
                 RevertibleCommand revertibleCommand = (RevertibleCommand) command;
                 try {
-                    revertibleCommand.revert();
+                    //revertibleCommand.revert();
                 } catch (Exception e) {
                     logger.error("Unexpected: ", e);
                 }
