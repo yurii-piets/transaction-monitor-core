@@ -53,8 +53,10 @@ Start a new transaction by calling: `transactionService.newTransaction()`.
 
 ## Testing ##    
 - To perform the local tests (`LocalTest.java`), two local PSQL databases should be created, named `tmone` and `tmtwo`, and all of the required parameters (url, username, password) should be specified in the `test.properties` file.
+Run: `gradle localTest` 
 
 - To perform the remote tests (`RemoteTest.java`) internet connection is required. The remote host contains a **MS Azure** database and a **MySql** database.
+Run: `gradle remoteTest`
 
 ## Programming patterns ##
 Programmings patterns that are used:
