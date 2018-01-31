@@ -1,10 +1,10 @@
 package com.tmc.connection.config;
 
-import com.tmc.ApplicationContext;
 import com.tmc.connection.services.PropertyService;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Configuration of database
@@ -17,13 +17,16 @@ public class DatabaseConfig {
     private final static String DRIVER_CLASSNAME_PATTERN = "{qualifier}.driver-class-name";
     private final static String QUALIFIER_PATTERN = "{qualifier}";
 
-    private final ApplicationContext applicationContext;
+    /**
+     * Map of DataSource instances that can accessed via database qualifier.
+     */
+    private final Map<String, DataSource> dataSources;
 
     private final PropertyService propertyService;
 
-    public DatabaseConfig(ApplicationContext applicationContext,
+    public DatabaseConfig(Map<String, DataSource> dataSources,
                           PropertyService propertyService) {
-        this.applicationContext = applicationContext;
+        this.dataSources = dataSources;
         this.propertyService = propertyService;
 
         configureDataSources();
@@ -37,7 +40,7 @@ public class DatabaseConfig {
     private void configureDataSources() {
         for (String qualifier : propertyService.getQualifiers()) {
             DataSource dataSource = dataSource(qualifier);
-            applicationContext.addDataSource(qualifier, dataSource);
+            dataSources.put(qualifier, dataSource);
         }
     }
 
@@ -51,8 +54,8 @@ public class DatabaseConfig {
         BasicDataSource basicDataSource = new BasicDataSource();
 
         basicDataSource.setUrl(propertyService.getRequiredProperty(URL_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        basicDataSource.setUsername(propertyService.getRequiredProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
-        basicDataSource.setPassword(propertyService.getRequiredProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setUsername(propertyService.getProperty(USERNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
+        basicDataSource.setPassword(propertyService.getProperty(PASSWORD_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
         basicDataSource.setDriverClassName(propertyService.getRequiredProperty(DRIVER_CLASSNAME_PATTERN.replace(QUALIFIER_PATTERN, qualifier)));
 
         return basicDataSource;

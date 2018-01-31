@@ -29,14 +29,6 @@ public interface Transaction extends And {
      * Add queries that will be executed in current transaction
      *
      * @param qualifier of database on which current queries will be executed
-     * @param file instance of file that contains sql queries
-     */
-    And addStatement(String qualifier, File file) throws IOException;
-
-    /**
-     * Add queries that will be executed in current transaction
-     *
-     * @param qualifier of database on which current queries will be executed
      * @param path to a file that contains sql queries
      *
      * @see Path
@@ -44,9 +36,17 @@ public interface Transaction extends And {
     And addStatement(String qualifier, Path path) throws IOException;
 
     /**
+     * Add queries that will be executed in current transaction
+     *
+     * @param qualifier of database on which current queries will be executed
+     * @param file instance of file that contains sql queries
+     */
+    And addStatement(String qualifier, File file) throws IOException;
+
+    /**
      * Commits queries to all databases
      */
-    And commit();
+    void commit();
 
     /**
      * makes possible to call methods of this class in sequence

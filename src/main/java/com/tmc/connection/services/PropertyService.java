@@ -8,6 +8,7 @@ import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +28,15 @@ public class PropertyService {
     @Getter
     private Set<String> qualifiers;
 
+    /**
+     * The persistent set of properties.
+     */
     private Set<Properties> properties;
+
+    /**
+     * Regex that matches environmental variable notation e.g ${VARIABLE_NAME}
+     */
+    private final static String ENVIRONMENTAL_VARIABLE_PATTERN = "^(\\$\\{).*(})$";
 
     public PropertyService() {
         initQualifiers();
@@ -76,8 +85,15 @@ public class PropertyService {
                 .collect(Collectors.toSet());
     }
 
-    public String getRequiredProperty(String key) {
-        String property = getPropertyByName(key);
+
+    /**
+     *
+     * @param key - by this property is found in properties files
+     * @return property value that is specified by key
+     * @throws InterruptedException - in case if property specified by the key does not exist
+     */
+    public String getRequiredProperty(String key) throws IllegalStateException {
+        String property = getProperty(key);
 
         if (property == null) {
             throw new IllegalStateException("Could not find property with the name: " + key);
@@ -86,13 +102,40 @@ public class PropertyService {
         return property;
     }
 
-    private String getPropertyByName(String key) {
+    /**
+     *
+     * @param key - by this property is found in properties files
+     * @return property value that is specified by key
+     *         or null is property does not exist
+     */
+    public String getProperty(String key) {
+        String propertyValue = null;
         for (Properties property : properties) {
             if (property.containsKey(key)) {
-                return property.getProperty(key);
+                propertyValue = property.getProperty(key);
+                break;
             }
         }
 
-        return null;
+        if(propertyValue != null && propertyValue.matches(ENVIRONMENTAL_VARIABLE_PATTERN)){
+            propertyValue = getEnvironmentalVariable(propertyValue);
+        }
+
+        return propertyValue;
+    }
+
+    /**
+     *
+     * @param property key to environmental variable
+     * @return value of environmental variable specified by the key
+     */
+    private String getEnvironmentalVariable(String property) {
+        Map<String, String> environment = System.getenv();
+
+        String propertyName = property
+                .replaceFirst("\\$\\{", "")
+                .replaceFirst("}$", "");
+
+        return environment.get(propertyName);
     }
 }

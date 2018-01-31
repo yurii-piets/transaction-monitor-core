@@ -3,7 +3,6 @@ package com.tmc.transaction.core.impl;
 import com.tmc.connection.services.ConnectionService;
 import com.tmc.exception.SQLAutoCommitException;
 import com.tmc.exception.SQLConnectionException;
-import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.impl.DatabaseCommand;
 import com.tmc.transaction.core.def.And;
 import com.tmc.transaction.core.def.Transaction;
@@ -17,7 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,8 @@ public class TransactionImpl implements Transaction {
 
     private final CommandsExecutor executor;
 
+    private String FORBIDDEN_STATEMENTS_REGEX;
+
     /**
      * Set  qualifiers od databases on which current transaction is performed
      */
@@ -38,6 +42,8 @@ public class TransactionImpl implements Transaction {
                            CommandsExecutor executor) {
         this.connectionService = connectionService;
         this.executor = executor;
+
+        initNotAllowedStatementsRegex();
     }
 
     @Override
@@ -62,11 +68,16 @@ public class TransactionImpl implements Transaction {
     public And addStatement(String qualifier, String query) {
         try {
             Connection connection = connectionService.getConnectionByQualifier(qualifier);
-
             String filteredQuery = filterQuery(query);
 
-            Command command = new DatabaseCommand(connection, filteredQuery);
-            executor.addCommand(command);
+            Arrays.stream(filteredQuery.split(";"))
+                    .filter(Objects::nonNull)
+                    .filter(statement -> !statement.isEmpty())
+                    .filter(statement -> !statement.matches("^\n*$"))
+                    .map(statement -> statement + ";")
+                    .map(statement -> new DatabaseCommand(connection, statement))
+                    .forEach(executor::addCommand);
+
         } catch (SQLConnectionException e) {
             logger.error("Unexpected: ", e);
         }
@@ -75,27 +86,23 @@ public class TransactionImpl implements Transaction {
     }
 
     @Override
-    public And addStatement(String qualifier, File file) throws IOException {
-        String query = Files.readAllLines(file.toPath())
-                .stream()
-                .collect(Collectors.joining());
-        addStatement(qualifier, query);
-
-        return this;
-    }
-
-    @Override
     public And addStatement(String qualifier, Path path) throws IOException {
         String query = Files.readAllLines(path)
                 .stream()
-                .collect(Collectors.joining());
+                .collect(Collectors.joining("\n"));
 
         addStatement(qualifier, query);
         return this;
     }
 
     @Override
-    public And commit() {
+    public And addStatement(String qualifier, File file) throws IOException {
+        addStatement(qualifier, file.toPath());
+        return this;
+    }
+
+    @Override
+    public void commit() {
         try {
             logger.info("Performing transaction.");
             executor.executeCommands();
@@ -104,11 +111,11 @@ public class TransactionImpl implements Transaction {
         } catch (Exception e) {
             logger.error("Unexpected: " + e.getLocalizedMessage(), e.getCause());
             executor.revertCommands();
+            executor.clearCommands();
             logger.error("Applied revert on database.");
         }
 
         finishTransaction();
-        return this;
     }
 
     /**
@@ -119,7 +126,7 @@ public class TransactionImpl implements Transaction {
             try {
                 Connection connection = connectionService.getConnectionByQualifier(qualifier);
                 connection.commit();
-            } catch (SQLException | SQLConnectionException e) {
+            } catch (SQLException e) {
                 logger.error("Unexpected: ", e);
             }
         }
@@ -132,7 +139,9 @@ public class TransactionImpl implements Transaction {
      */
     private void turnOffAutoCommit(Connection connection) throws SQLAutoCommitException {
         try {
-            connection.setAutoCommit(false);
+            if (connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+            }
         } catch (SQLException e) {
             throw new SQLAutoCommitException(e);
         }
@@ -145,19 +154,7 @@ public class TransactionImpl implements Transaction {
      * @return filtered query
      */
     private String filterQuery(String query) {
-        String filteredQuery = query
-                .replace("begin;", "")
-                .replace("commit;", "");
-
-        if (query.contains("begin;")) {
-            logger.warn("Query's body contains \"begin;\" statement, it will be ignored during the transaction");
-        }
-
-        if (query.contains("commit;")) {
-            logger.warn("Query's body contains \"commit;\" statement, it will be ignored during the transaction");
-        }
-
-        return filteredQuery;
+        return query.replaceAll(FORBIDDEN_STATEMENTS_REGEX, "");
     }
 
     /**
@@ -165,14 +162,21 @@ public class TransactionImpl implements Transaction {
      * close opened connection in current transaction
      */
     private void finishTransaction() {
-        for (String qualifier : activeQualifiers) {
-            try {
-                Connection connection = connectionService.getConnectionByQualifier(qualifier);
-                connection.close();
-            } catch (SQLException | SQLConnectionException e) {
-                logger.error("Unexpected: ", e);
-            }
-        }
-        connectionService.clearCache();
+        connectionService.releaseConnections();
+    }
+
+    private void initNotAllowedStatementsRegex() {
+        FORBIDDEN_STATEMENTS_REGEX = "(?i)\\b" + new ArrayList<String>() {{
+            add("begin;");
+            add("begin transaction;");
+            add("start transaction;");
+            add("commit;");
+            add("commit transaction;");
+            add("rollback;");
+            add("rollback transaction;");
+            add("end;");
+        }}.stream()
+                .map(s -> "(" + s + ")")
+                .collect(Collectors.joining("|"));
     }
 }

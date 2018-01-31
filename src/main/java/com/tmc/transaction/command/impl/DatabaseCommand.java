@@ -6,8 +6,6 @@ import com.tmc.exception.SQLSavepointCreationException;
 import com.tmc.exception.SQLStatementException;
 import com.tmc.transaction.command.def.Command;
 import com.tmc.transaction.command.def.RevertibleCommand;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -21,8 +19,6 @@ import java.sql.Statement;
  * @see Command
  * @see RevertibleCommand
  */
-@Data
-@AllArgsConstructor
 @RequiredArgsConstructor
 public class DatabaseCommand implements RevertibleCommand {
 
@@ -54,41 +50,46 @@ public class DatabaseCommand implements RevertibleCommand {
      */
     @Override
     public void execute() throws SQLQueryException, SQLSavepointCreationException, SQLStatementException {
-        try {
-            initSavepoint();
-        } catch (SQLException e) {
-            throw new SQLSavepointCreationException(e);
-        }
-
-        Statement statement;
-        try {
-            statement = connection.createStatement();
-        } catch (SQLException e) {
-            throw new SQLStatementException(e);
-        }
-
-        try {
-            statement.execute(sql);
-        } catch (SQLException e) {
-            throw new SQLQueryException(e);
-        }
+        initSavepoint();
+        Statement statement = createStatement();
+        executeStatement(statement);
     }
 
     /**
-     * Reverts execution of a command by releasing current savepoint
+     * Reverts execution of a command by reverting to current savepoint
      *
      * @see Savepoint
      */
     @Override
     public void revert() throws SQLRevertException {
         try {
-            connection.releaseSavepoint(savepoint);
+            connection.rollback(savepoint);
         } catch (SQLException e) {
             throw new SQLRevertException(e);
         }
     }
 
-    private void initSavepoint() throws SQLException {
-        savepoint = connection.setSavepoint();
+    private void initSavepoint() throws SQLSavepointCreationException {
+        try {
+            savepoint = connection.setSavepoint();
+        } catch (SQLException e) {
+            throw new SQLSavepointCreationException(e);
+        }
+    }
+
+    private Statement createStatement() throws SQLStatementException {
+        try {
+            return connection.createStatement();
+        } catch (SQLException e) {
+            throw new SQLStatementException(e);
+        }
+    }
+
+    private void executeStatement(Statement statement) throws SQLQueryException {
+        try {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            throw new SQLQueryException(e, sql);
+        }
     }
 }
